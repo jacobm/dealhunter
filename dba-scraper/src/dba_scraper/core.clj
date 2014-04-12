@@ -66,9 +66,13 @@
               res (time/date-time (time/year today) (time/month parsed) (time/day parsed))]
           res))))
 
+(defn get-dba-id [item]
+  (subs (re-find #"id-[0-9]+" (:link item)) 3))
+
 (defn- transform [item]
   (dissoc
    (assoc item 
+     :id (get-dba-id item)
      :price (get-price item) 
      :text (if (s/blank? (-> (:text item)
                              (s/trim-newline)
