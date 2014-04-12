@@ -102,7 +102,7 @@
   (html/html-resource (java.net.URL. url)))
 
 (def dba-host "http://www.dba.dk")
-(def ^:dynamic *base-url* "http://www.dba.dk/soeg/?soeg=stokke")
+(def ^:dynamic *base-url* "http://www.dba.dk/soeg/?soeg=dingo")
 (def page (fetch-url *base-url*))
 
 (defn prune-items [items last-known-link]
