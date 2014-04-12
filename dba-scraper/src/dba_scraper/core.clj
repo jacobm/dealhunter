@@ -121,4 +121,4 @@
                 page-items (get-items (fetch-url url))]
             (if (some #{last-known-link} (map #(:link %) it))
               (prune-items (into it page-items) last-known-link)
-              (recur (into it page-items) (+ page-number 1)))))))))
+              (recur (concat it page-items) (+ page-number 1))))))))))
