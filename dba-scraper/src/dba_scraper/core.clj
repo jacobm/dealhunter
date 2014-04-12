@@ -81,12 +81,22 @@
      :date (str (get-date item)))
   :thumbnail-alt :text-alt))
 
+(defn get-listings-first-page [page]
+  (let [listings (html/select page listings-selector)]
+        (concat
+         (take-while #(not (nil? 
+                           (re-find #"cpcListing" (:class (:attrs %))))) listings)
+         (filter #(nil? (re-find #"cpcListing" (:class (:attrs %)))) listings))))
+
 (defn get-listings [page]
   (let [listings (html/select page listings-selector)]
     (filter #(nil? (re-find #"cpcListing" (:class (:attrs %)))) listings)))
 
 (defn get-items [page]
   (map #(transform (extract %)) (get-listings page)))
+
+(defn get-items-first-page [page]
+  (map #(transform (extract %)) (get-listings-first-page page)))
 
 (defn- fetch-url [url]
   (html/html-resource (java.net.URL. url)))
@@ -101,7 +111,7 @@
 (defn search [search-term last-known-link]
   (let [first-page (fetch-url (str dba-host "/soeg?soeg=" search-term))
         number-of-pages (get-number-of-pages first-page)
-        items (get-items first-page)]
+        items (get-items-first-page first-page)]
     (if (some #{last-known-link} (map #(:link %) items))
       (prune-items items last-known-link)
       (loop [it items page-number 2]
