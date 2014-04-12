@@ -70,11 +70,10 @@
   (dissoc
    (assoc item 
      :price (get-price item) 
-     :text (if (or (nil? (:text item))
-                   (s/blank? (-> (:text item)
-                                 (s/trim-newline)
-                                 (s/trim)))
-                   (:text-alt item))
+     :text (if (s/blank? (-> (:text item)
+                             (s/trim-newline)
+                             (s/trim)))
+             (:text-alt item)
              (:text item))
      :thumbnail (if (nil? (:thumbnail item))
                   (:thumbnail-alt item)
