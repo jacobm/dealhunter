@@ -13,16 +13,22 @@
   {:status 200
    :headers {"Content-Type" "application/edn"}
    :body (prn-str data)})
+
+(defn read-post-body [request]
+  (read-string (slurp (:body request))))
   
 (defroutes app-routes
   (GET "/" [] "index")
-  (GET "/:user-id" [user-id] (str "UserId " user-id))
+  (POST "/user/:user-id" [user-id :as request]
+        (println (read-post-body request)) user-id)
+  (POST "/user-test" request (return-edn (read-post-body request)))
+  (GET "/user/:user-id" [user-id] (str "UserId " user-id))
   (GET "/search" {{name :name} :params} (return-edn (scraper/search-one name))))
 
 (def app 
   (-> (handler/api app-routes)
-      (reload/wrap-reload)
-      (cors/wrap-cors :access-control-allow-origin "*")))
+      (reload/wrap-reload)))
+      ;(cors/wrap-cors :access-control-allow-origin "*")))
 
 (defn -main [& args]
   (let [port (Integer/parseInt (or (System/getenv "PORT") "3000"))]
