@@ -110,6 +110,10 @@
 (defn retrieve-one [url]
   (html/html-resource (:body @(client/get url {:as :stream}))))
 
+(defn search-one [search-term]
+  (let [first-page (retrieve-one (str dba-host "/soeg?soeg=" search-term))]
+    (get-items first-page)))
+
 (defn search
   ([search-term] (search search-term -1))
   ([search-term last-dba-id]
