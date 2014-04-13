@@ -2,6 +2,7 @@
   (:require [net.cgrand.enlive-html :as html]
             [clj-time.core :as time]
             [clj-time.format :as format]
+            [org.httpkit.client :as client]
             [clojure.string :as s]))
 
 (def listings-selector [:table.searchResults :> :tbody :tr.dbaListing])
