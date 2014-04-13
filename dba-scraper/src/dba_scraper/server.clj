@@ -28,7 +28,8 @@
 (def app 
   (-> (handler/api app-routes)
       (reload/wrap-reload)))
-      ;(cors/wrap-cors :access-control-allow-origin "*")))
+;http://stackoverflow.com/questions/5584923/a-cors-post-request-works-from-plain-javascript-but-why-not-with-jquery
+      ;(cors/wrap-cors :access-control-allow-origin "x-requested-with")))
 
 (defn -main [& args]
   (let [port (Integer/parseInt (or (System/getenv "PORT") "3000"))]
