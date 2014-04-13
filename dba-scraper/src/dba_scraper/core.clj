@@ -103,19 +103,30 @@
 (defn prune-items [items last-known-link]
   (take-while #(not= (:link %) last-known-link) items))
 
+(defn retrieve [urls]
+  (let [futures (doall (map #(client/get % {:as :stream}) urls))]
+    (map #(html/html-resource (:body @%)) futures)))
+
+(defn retrieve-one [url]
+  (html/html-resource (:body @(client/get url {:as :stream}))))
+
 (defn search
-  ([search-term] (search search-term "none"))
-  ([search-term last-known-link]
-  (let [first-page (fetch-url (str dba-host "/soeg?soeg=" search-term))
-        number-of-pages (get-number-of-pages first-page)
-        items (get-items first-page)]
-    (if (some #{last-known-link} (map #(:link %) items))
-      (prune-items items last-known-link)
-      (loop [it items page-number 2]
-        (if (< number-of-pages page-number)
-          it
-          (let [url (str dba-host "/soeg/side-" page-number "?soeg=" search-term)
-                page-items (get-items (fetch-url url))]
-            (if (some #{last-known-link} (map #(:link %) it))
-              (prune-items (into it page-items) last-known-link)
-              (recur (concat it page-items) (+ page-number 1))))))))))
+  ([search-term] (search search-term -1))
+  ([search-term last-dba-id]
+     (let [first-page (retrieve-one (str dba-host "/soeg?soeg=" search-term))
+           number-of-pages (get-number-of-pages first-page)
+           other-pages (map #(str dba-host "/soeg/side-" % "?soeg=" search-term)
+                            (range 2 (inc number-of-pages)))
+           first-page-items (get-items first-page)]
+       (if (some #{last-dba-id} (map #(:id %) first-page-items))
+         (take-while #(not= (:id %) last-dba-id) first-page-items)
+         (let [chunks (partition 10 other-pages)]
+           (loop [chunks chunks
+                  result first-page-items]
+             (let [chunk-items (flatten (map #(get-items %) (retrieve (first chunks))))]
+               (if (some #{last-dba-id} (map #(:id %) chunk-items))
+                 (concat result (take-while #(not= (:id %) last-dba-id) chunk-items))
+                 (do
+                   (if (empty? (rest chunks))
+                     result
+                     (recur (rest chunks) (concat result chunk-items))))))))))))
