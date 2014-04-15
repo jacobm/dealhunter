@@ -69,9 +69,9 @@
 (defroutes app-routes
   (GET "/" [] "index")
   (POST "/user/:user-id" [user-id :as request]
-        (println (read-post-body request)) user-id)
+        (insert-monitor (read-string user-id) (:search-term (read-post-body request))) "ok")
   (POST "/user-test" request (return-edn (read-post-body request)))
-  (GET "/user/:user-id" [user-id] (str "UserId " user-id))
+  (GET "/user/:user-id" [user-id] (return-edn (get-monitors (read-string user-id))))
   (GET "/search" {{name :name} :params} (return-edn (scraper/search-one name))))
 
 (def app 
