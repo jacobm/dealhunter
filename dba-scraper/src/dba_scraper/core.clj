@@ -73,7 +73,7 @@
 (defn- transform [item]
   (dissoc
    (assoc item 
-     :id (get-dba-id item)
+     :dba-id (get-dba-id item)
      :price (get-price item) 
      :text (if (s/blank? (-> (:text item)
                              (s/trim-newline)
@@ -122,14 +122,15 @@
            other-pages (map #(str dba-host "/soeg/side-" % "?soeg=" search-term)
                             (range 2 (inc number-of-pages)))
            first-page-items (get-items first-page)]
-       (if (some #{last-dba-id} (map #(:id %) first-page-items))
-         (take-while #(not= (:id %) last-dba-id) first-page-items)
+       (println "Ids: " (map #(:dba-id %) first-page-items))
+       (if (some #{last-dba-id} (map #(:dba-id %) first-page-items))
+         (take-while #(not= (:dba-id %) last-dba-id) first-page-items)
          (let [chunks (partition 10 other-pages)]
            (loop [chunks chunks
                   result first-page-items]
              (let [chunk-items (flatten (map #(get-items %) (retrieve (first chunks))))]
-               (if (some #{last-dba-id} (map #(:id %) chunk-items))
-                 (concat result (take-while #(not= (:id %) last-dba-id) chunk-items))
+               (if (some #{last-dba-id} (map #(:dba-id %) chunk-items))
+                 (concat result (take-while #(not= (:dba-id %) last-dba-id) chunk-items))
                  (do
                    (if (empty? (rest chunks))
                      result
