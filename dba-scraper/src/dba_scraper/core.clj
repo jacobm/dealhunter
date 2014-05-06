@@ -68,7 +68,7 @@
           res))))
 
 (defn get-dba-id [item]
-  (read-string (subs (re-find #"id-[0-9]+" (:link item)) 3)))
+  (int (read-string (subs (re-find #"id-[0-9]+" (:link item)) 3))))
 
 (defn- transform [item]
   (dissoc
