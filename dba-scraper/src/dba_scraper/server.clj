@@ -85,14 +85,22 @@
     {:current (first next-current)
      :next (second next-current)
      :previous (first previous)}))
-(defn return-edn [data]
-  {:status 200
-   :headers {"Content-Type" "application/edn"}
-   :body (prn-str data)})
+
+;; === web ===
+(defn return-data [request data]
+  (if (= "application/edn" (:content-type request))
+    {:status 200
+     :headers {"Content-Type" "application/edn"}
+     :body (pr-str data)}
+    {:status 200
+     :headers {"Content-Type" "application/json"}
+     :body (json/write-str data)}))
 
 (defn read-post-body [request]
-  (read-string (slurp (:body request))))
-  
+  (if (= "application/edn" (:content-type request))
+    (read-string (slurp (:body request)))
+    (json/read-str (:body request))))
+
 (defroutes app-routes
   (GET "/" [] "index")
   (POST "/user/:user-id" [user-id :as request]
