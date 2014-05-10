@@ -109,6 +109,20 @@
     {:user-id user-id
      :monitors (map #(str base-url "/feed/" (:search-term %)) monitors)}))
 
+(defn feed-item [request id search-term]
+  (let [{next :next prev :previous :as data} (get-step id search-term)
+        feed-base-url (str (base-url request) "/feed/" search-term "/")
+        item      {:entry (dissoc
+                           (:current data)
+                           :_id)}
+        self-link {:rel "self" :href (str feed-base-url id) :nil false}
+        next-link {:rel "next" :href (str feed-base-url (:_id next)) :nil (nil? (:_id next))}
+        prev-link {:rel "prev" :href (str feed-base-url (:_id prev)) :nil (nil? (:_id prev))}]
+  (let [links (map #(dissoc % :nil)
+                     (filter #(not (:nil %)) [self-link next-link prev-link]))]
+    (assoc item :links links))))
+
+
 (defroutes app-routes
   (GET "/" [] "index")
   (POST "/user/:user-id" [user-id :as request]
