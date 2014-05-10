@@ -9,7 +9,8 @@
             [dba-scraper.core :as scraper]
             [monger.core :as mg :refer [connect! set-db! get-db]]
             [monger.collection :as mc :refer [insert insert-batch]]
-            [monger.query :refer :all])
+            [monger.operators :refer [$lte $gt]]
+            [monger.query :refer :all]
   (:refer-clojure :exclude [sort find])
   (:import [org.bson.types ObjectId])
   (:gen-class))
@@ -58,6 +59,31 @@
          (dissoc % :_id))
        (mc/find-maps "monitor" {:user-id user-id})))
 
+(defn get-oldest [search-term]
+  (first (with-collection "scrapes"
+           (find {:search-term search-term})
+           (sort (array-map :_id -1))
+           (limit 1))))
+
+(defn get-newest [search-term]
+  (first (with-collection "scrapes"
+           (find {:search-term search-term})
+           (sort (array-map :_id 1))
+           (limit 1))))
+
+(defn get-step [id-str search-term]
+  (let [id (ObjectId. id-str)
+        next-current (with-collection "scrapes"
+                           (find {:search-term search-term :_id {$lte id}})
+                           (sort (array-map :_id -1))
+                           (limit 2))
+        previous (with-collection "scrapes"
+               (find {:search-term search-term :_id {$gt id}})
+               (sort (array-map :_id 1))
+               (limit 1))]
+    {:current (first next-current)
+     :next (second next-current)
+     :previous (first previous)}))
 (defn return-edn [data]
   {:status 200
    :headers {"Content-Type" "application/edn"}
