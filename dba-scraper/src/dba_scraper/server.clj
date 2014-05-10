@@ -93,6 +93,8 @@
      :previous (second prev-current)
      :next next}))
 
+(defn feed-exists? [search-term]
+  (mc/any? "scrapes" {:search-term search-term}))
 
 ;; === web ===
 (defn return-data [request data]
@@ -150,25 +152,36 @@
 
 
 (defroutes app-routes
+  ;; test stuff
   (GET "/" request (do
                      (println request)
                      (return-data request {:fisk "fisk" :hest [1 2 3]})))
-  (POST "/user/:user-id" [user-id :as request]
-        (insert-monitor (read-string user-id) (:search-term (read-post-body request))) "ok")
-  (POST "/user-test" request (return-data request (read-post-body request)))
-  (GET "/user/:user-id" [user-id :as request]
-       (return-data request (user-feed (read-string user-id) (base-url request))))
-  (GET "/feed/:search-term" [search-term] "fisk")
-  (GET "/feed/:search-term/:item-id" [search-term item-id :as request]
-       (return-data request (feed-item request item-id search-term)))
   (GET "/dingo" request (base-url request))
-  (GET "/search" request {{name :name} :params}
+
+  (context "/user/:user-id" [user-id :as request]
+           (GET "/" []
+                (return-data request (user-feed (read-string user-id) (base-url request))))
+           (POST "/" []
+                 (insert-monitor (read-string user-id)
+                                 (:search-term (read-post-body request))) "ok"))
+
+  (context "/feed/:search-term" [search-term :as request]
+           (GET "/" []
+                (if-not (feed-exists? search-term)
+                  (response/not-found "Feed was not found")
+                  (return-data request (feed-start (base-url request) search-term))))
+           (GET "/:item-id" [item-id]
+                (return-data request (feed-item (base-url request) item-id search-term))))
+
+  (GET "/search" request
        (let [name (:name (:params request))]
          (do
            (scraper/search name (get-newest-id name))
-           (return-data (mc/find-maps "scrapes" {:search-term name})))))
-  (GET "/search-one" request {{name :name} :params}
-       (return-data request  (scraper/search-one name))))
+           (return-data request
+                        (map #(dissoc % :_id)
+                                     (mc/find-maps "scrapes" {:search-term name}))))))
+  (GET "/search-one" request
+       (return-data request  (scraper/search-one (:name (:params request))))))
 
 (def app 
   (-> (handler/api app-routes)
