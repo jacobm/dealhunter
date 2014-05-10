@@ -109,15 +109,33 @@
     {:user-id user-id
      :monitors (map #(str base-url "/feed/" (:search-term %)) monitors)}))
 
-(defn feed-item [request id search-term]
+(defn- feed-link [feed-base-url rel id]
+  {:rel rel :href (str feed-base-url id) :nil (nil? id)})
+
+; oldest -> next -> next -> newest (newest has not next)
+; newest -> prev -> prev -> oldest (oldest has no prev)
+
+(defn feed-start [base-url search-term]
+  (let [newest (get-newest search-term)
+        oldest (get-oldest search-term)
+        next (get-next (str (:_id oldest)) search-term)
+        feed-base-url (str base-url "/feed/" search-term "/")
+        item {:entry (dissoc oldest :_id)}
+        self-link  (feed-link feed-base-url "self" (:_id oldest))
+        first-link (feed-link feed-base-url "first" (:_id oldest))
+        last-link  (feed-link feed-base-url "last" (:_id newest))
+        next-link  (feed-link feed-base-url "next" (:_id next))]
+    (let [links (map #(dissoc % :nil)
+                     (filter #(not (:nil %)) [self-link next-link first-link last-link]))]
+      (assoc item :links links))))
+
+(defn feed-item [base-url id search-term]
   (let [{next :next prev :previous :as data} (get-step id search-term)
-        feed-base-url (str (base-url request) "/feed/" search-term "/")
-        item      {:entry (dissoc
-                           (:current data)
-                           :_id)}
-        self-link {:rel "self" :href (str feed-base-url id) :nil false}
-        next-link {:rel "next" :href (str feed-base-url (:_id next)) :nil (nil? (:_id next))}
-        prev-link {:rel "prev" :href (str feed-base-url (:_id prev)) :nil (nil? (:_id prev))}]
+        feed-base-url (str base-url "/feed/" search-term "/")
+        item {:entry (dissoc (:current data) :_id)}
+        self-link (feed-link feed-base-url "self" id)
+        next-link (feed-link feed-base-url "next" (:_id next))
+        prev-link (feed-link feed-base-url "prev" (:_id prev))]
   (let [links (map #(dissoc % :nil)
                      (filter #(not (:nil %)) [self-link next-link prev-link]))]
     (assoc item :links links))))
