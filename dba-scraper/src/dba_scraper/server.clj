@@ -46,7 +46,7 @@
                                     (find {:search-term search-term})
                                     (sort (array-map :_id 1))
                                     (limit 1)))]
-        (:dba-id newest-scrape-item)))
+    (:dba-id newest-scrape-item)))
 
 (defn insert-monitor [user-id search-term]
   (let [existing (mc/find-one-as-map "monitor" {:user-ud user-id :search-term search-term})]
