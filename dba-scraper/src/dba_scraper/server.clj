@@ -124,12 +124,25 @@
 
 
 (defroutes app-routes
-  (GET "/" [] "index")
+  (GET "/" request (do
+                     (println request)
+                     (return-data request {:fisk "fisk" :hest [1 2 3]})))
   (POST "/user/:user-id" [user-id :as request]
         (insert-monitor (read-string user-id) (:search-term (read-post-body request))) "ok")
-  (POST "/user-test" request (return-edn (read-post-body request)))
-  (GET "/user/:user-id" [user-id] (return-edn (get-monitors (read-string user-id))))
-  (GET "/search" {{name :name} :params} (return-edn (scraper/search-one name))))
+  (POST "/user-test" request (return-data request (read-post-body request)))
+  (GET "/user/:user-id" [user-id :as request]
+       (return-data request (user-feed (read-string user-id) (base-url request))))
+  (GET "/feed/:search-term" [search-term] "fisk")
+  (GET "/feed/:search-term/:item-id" [search-term item-id :as request]
+       (return-data request (feed-item request item-id search-term)))
+  (GET "/dingo" request (base-url request))
+  (GET "/search" request {{name :name} :params}
+       (let [name (:name (:params request))]
+         (do
+           (scraper/search name (get-newest-id name))
+           (return-data (mc/find-maps "scrapes" {:search-term name})))))
+  (GET "/search-one" request {{name :name} :params}
+       (return-data request  (scraper/search-one name))))
 
 (def app 
   (-> (handler/api app-routes)
