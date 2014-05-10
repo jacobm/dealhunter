@@ -104,6 +104,11 @@
 (defn base-url [request]
   (str "http://" (get (:headers request) "host")))
 
+(defn user-feed [user-id base-url]
+  (let [monitors (get-monitors user-id)]
+    {:user-id user-id
+     :monitors (map #(str base-url "/feed/" (:search-term %)) monitors)}))
+
 (defroutes app-routes
   (GET "/" [] "index")
   (POST "/user/:user-id" [user-id :as request]
