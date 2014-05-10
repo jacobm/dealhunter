@@ -17,7 +17,7 @@
 
 ;; === persistence ===
 
-(mg/connect! { :host "127.0.0.1" :port 49153 })
+(mg/connect! { :host "127.0.0.1" :port 27017 })
 (set-db! (monger.core/get-db "monger-test"))
 
 (defn upsert-scrape [search-term]
