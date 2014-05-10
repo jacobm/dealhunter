@@ -101,6 +101,9 @@
     (read-string (slurp (:body request)))
     (json/read-str (:body request))))
 
+(defn base-url [request]
+  (str "http://" (get (:headers request) "host")))
+
 (defroutes app-routes
   (GET "/" [] "index")
   (POST "/user/:user-id" [user-id :as request]
