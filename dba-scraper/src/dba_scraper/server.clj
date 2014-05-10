@@ -9,8 +9,9 @@
             [dba-scraper.core :as scraper]
             [monger.core :as mg :refer [connect! set-db! get-db]]
             [monger.collection :as mc :refer [insert insert-batch]]
-            [monger.operators :refer [$lte $gt]]
+            [monger.operators :refer [$lte $gt $lt $gte]]
             [monger.query :refer :all]
+            [clojure.string]
             [clojure.data.json :as json])
   (:refer-clojure :exclude [sort find])
   (:import [org.bson.types ObjectId])
@@ -72,19 +73,26 @@
            (sort (array-map :_id 1))
            (limit 1))))
 
+(defn get-next [id-str search-term]
+  (if (clojure.string/blank? id-str)
+    nil
+    (let [id (ObjectId. id-str)]
+      (first (with-collection "scrapes"
+               (find {:search-term search-term :_id {$lt id}})
+               (sort (array-map :_id -1))
+               (limit 1))))))
+
 (defn get-step [id-str search-term]
   (let [id (ObjectId. id-str)
-        next-current (with-collection "scrapes"
-                           (find {:search-term search-term :_id {$lte id}})
-                           (sort (array-map :_id -1))
+        prev-current (with-collection "scrapes"
+                           (find {:search-term search-term :_id {$gte id}})
+                           (sort (array-map :_id 1))
                            (limit 2))
-        previous (with-collection "scrapes"
-               (find {:search-term search-term :_id {$gt id}})
-               (sort (array-map :_id 1))
-               (limit 1))]
-    {:current (first next-current)
-     :next (second next-current)
-     :previous (first previous)}))
+        next (get-next id-str search-term)]
+    {:current (first prev-current)
+     :previous (second prev-current)
+     :next next}))
+
 
 ;; === web ===
 (defn return-data [request data]
