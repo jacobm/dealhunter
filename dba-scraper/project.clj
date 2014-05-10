@@ -10,6 +10,7 @@
                  [compojure "1.1.6"]
                  [ring "1.2.2"]
                  [ring-cors "0.1.0"]
+                 [org.clojure/data.json "0.2.4"]
                  [com.novemberain/monger "1.7.0"]]
   :plugins [[lein-midje "3.1.3"]
             [lein-ring "0.8.10"]]
