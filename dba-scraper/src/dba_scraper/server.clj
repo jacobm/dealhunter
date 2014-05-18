@@ -101,6 +101,7 @@
                "Access-Control-Allow-Origin:" "*"}
      :body (pr-str data)}
     {:status 200
+     :headers {"Content-Type" "application/hal+json"
                "Access-Control-Allow-Origin:" "*"}
      :body (json/write-str data)}))
 
