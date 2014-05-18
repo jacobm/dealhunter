@@ -21,7 +21,7 @@
 ;; === persistence ===
 
 (mg/connect! { :host "127.0.0.1" :port 27017 })
-(set-db! (monger.core/get-db "monger-test"))
+(set-db! (monger.core/get-db "dealhunter-dbascraper"))
 
 (defn upsert-scrape [search-term]
   (let [newest-item (first (with-collection "scrapes"
