@@ -161,7 +161,7 @@
                   (return-data request (feed-start (base-url request) search-term))))
            (POST "/" []
                  (do (upsert-scrape search-term)
-                     "ok"))
+                     (return-data request "ok")))
            (GET "/:item-id" [item-id]
                 (return-data request (feed-item (base-url request) item-id search-term))))
 
