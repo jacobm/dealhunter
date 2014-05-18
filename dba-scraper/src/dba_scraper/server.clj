@@ -100,10 +100,12 @@
 (defn return-data [request data]
   (if (= "application/edn" (:content-type request))
     {:status 200
-     :headers {"Content-Type" "application/edn"}
+     :headers {"Content-Type" "application/edn"
+               "Access-Control-Allow-Origin:" "*"}
      :body (pr-str data)}
     {:status 200
-     :headers {"Content-Type" "application/json"}
+     :headers {"Content-Type" "application/json"
+               "Access-Control-Allow-Origin:" "*"}
      :body (json/write-str data)}))
 
 (defn read-body [request]
@@ -186,8 +188,6 @@
 (def app 
   (-> (handler/api app-routes)
       (reload/wrap-reload)))
-;http://stackoverflow.com/questions/5584923/a-cors-post-request-works-from-plain-javascript-but-why-not-with-jquery
-      ;(cors/wrap-cors :access-control-allow-origin "x-requested-with")))
 
 (defn -main [& args]
   (let [port (Integer/parseInt (or (System/getenv "PORT") "3000"))]
