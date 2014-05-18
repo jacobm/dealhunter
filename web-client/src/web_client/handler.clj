@@ -44,12 +44,10 @@
 (defn return-data [request data]
   (if (= "application/edn" (:content-type request))
     {:status 200
-     :headers {"Content-Type" "application/edn"
-               "Access-Control-Allow-Origin:" "*"}
+     :headers {"Content-Type" "application/edn"}
      :body (pr-str data)}
     {:status 200
-     :headers {"Content-Type" "application/json"
-               "Access-Control-Allow-Origin:" "*"}
+     :headers {"Content-Type" "application/json"}
      :body (json/write-str data)}))
 
 (defn return-json [data]
