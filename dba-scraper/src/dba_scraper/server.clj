@@ -160,6 +160,7 @@
                      (return-data request {:fisk "fisk" :hest [1 2 3]})))
   (GET "/dingo" request (base-url request))
 
+  ;; streams
   (context "/user/:user-id" [user-id :as request]
            (GET "/" []
                 (return-data request (user-feed (read-string user-id) (base-url request))))
@@ -172,6 +173,9 @@
                 (if-not (feed-exists? search-term)
                   (response/not-found "Feed was not found")
                   (return-data request (feed-start (base-url request) search-term))))
+           (POST "/" []
+                 (do (upsert-scrape search-term)
+                     "ok"))
            (GET "/:item-id" [item-id]
                 (return-data request (feed-item (base-url request) item-id search-term))))
 
