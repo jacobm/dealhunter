@@ -1,0 +1,51 @@
+
+.item {
+  background: none repeat scroll 0 0 #e7e7e7;
+  border-radius: 5px;
+  box-shadow: 0 4px 4px -5px #C8C8C8;
+  padding: 30px;
+  margin: 0 0 12px;
+}
+
+.item-box-left {
+  display: inline-block
+  text-align: left;
+  margin-right: 20px;
+  width: 60px;
+}
+
+.item-box-center {
+  width: 380px;
+  width: calc(100% - 10px);
+  position: relative;
+}
+
+.item-box-right {
+
+}
+
+.item-price {
+ padding: 10px;
+}
+
+.headline {
+ padding: 10px;
+}
+
+.monitor {
+  background: none repeat scroll 0 0 #e7e7e7;
+  border-radius: 5px;
+  box-shadow: 0 4px 4px -5px #C8C8C8;
+  padding: 10px;
+  margin: 0 0 12px;
+}
+
+.search-term {
+  font-size: 16px;
+}
+
+.number-of-new-items {
+  padding: 10px;
+  color: blue;
+}
+
