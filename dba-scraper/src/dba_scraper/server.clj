@@ -67,6 +67,9 @@
            (sort (array-map :_id 1))
            (limit 1))))
 
+(defn get-count [search-term]
+  (mc/count "scrapes" {:search-term search-term}))
+
 (defn get-next [id-str search-term]
   (if (clojure.string/blank? id-str)
     nil
@@ -119,9 +122,10 @@
 (defn feed-start [base-url search-term]
   (let [newest (get-newest search-term)
         oldest (get-oldest search-term)
+        count (get-count search-term)
         next (get-next (str (:_id oldest)) search-term)
         feed-base-url (str base-url "/feed/" search-term "/")
-        item {:entry (dissoc oldest :_id)}
+        item (assoc (dissoc oldest :_id) :count count)
         self-link  (feed-link feed-base-url "self" (:_id oldest))
         first-link (feed-link feed-base-url "first" (:_id oldest))
         last-link  (feed-link feed-base-url "last" (:_id newest))
