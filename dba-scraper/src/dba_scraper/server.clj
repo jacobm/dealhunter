@@ -101,7 +101,6 @@
                "Access-Control-Allow-Origin:" "*"}
      :body (pr-str data)}
     {:status 200
-     :headers {"Content-Type" "application/json"
                "Access-Control-Allow-Origin:" "*"}
      :body (json/write-str data)}))
 
@@ -119,6 +118,13 @@
 ; oldest -> next -> next -> newest (newest has not next)
 ; newest -> prev -> prev -> oldest (oldest has no prev)
 
+(defn build-links [& links]
+  (println links)
+  (apply merge
+   (->> links
+        (filter #(not (:nil %)))
+        (map #(hash-map (keyword (:rel %)) {:href (:href %)})))))
+
 (defn feed-start [base-url search-term]
   (let [newest (get-newest search-term)
         oldest (get-oldest search-term)
@@ -130,21 +136,16 @@
         first-link (feed-link feed-base-url "first" (:_id oldest))
         last-link  (feed-link feed-base-url "last" (:_id newest))
         next-link  (feed-link feed-base-url "next" (:_id next))]
-    (let [links (map #(dissoc % :nil)
-                     (filter #(not (:nil %)) [self-link next-link first-link last-link]))]
-      (assoc item :links links))))
+      (assoc item :_links (build-links self-link next-link first-link last-link))))
 
 (defn feed-item [base-url id search-term]
   (let [{next :next prev :previous :as data} (get-step id search-term)
         feed-base-url (str base-url "/feed/" search-term "/")
-        item {:entry (dissoc (:current data) :_id)}
+        item {:_embedded (dissoc (:current data) :_id)}
         self-link (feed-link feed-base-url "self" id)
         next-link (feed-link feed-base-url "next" (:_id next))
         prev-link (feed-link feed-base-url "prev" (:_id prev))]
-  (let [links (map #(dissoc % :nil)
-                     (filter #(not (:nil %)) [self-link next-link prev-link]))]
-    (assoc item :links links))))
-
+    (assoc item :_links (build-links self-link next-link prev-link))))
 
 (defroutes app-routes
   ;; test stuff
