@@ -134,8 +134,8 @@
         feed-base-url (str base-url "/feed/" search-term "/")
         item (assoc (dissoc oldest :_id) :count count)
         self-link  (feed-link feed-base-url "self" (:_id oldest))
-        first-link (feed-link feed-base-url "first" (:_id oldest))
-        last-link  (feed-link feed-base-url "last" (:_id newest))
+        first-link (feed-link feed-base-url "oldest" (:_id oldest))
+        last-link  (feed-link feed-base-url "newest" (:_id newest))
         next-link  (feed-link feed-base-url "next" (:_id next))]
       (assoc item :_links (build-links self-link next-link first-link last-link))))
 
