@@ -64,7 +64,7 @@
 
 
 (defroutes app-routes
-  (GET "/" [] (response/redirect "/index.html"))
+  (GET "/" [] (response/resource-response "index.html" {:root "public"}))
 
   ;; user monitors and position in stream
   (context "/:user-id/monitors" [user-id :as request]
