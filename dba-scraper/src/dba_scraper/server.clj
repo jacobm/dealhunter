@@ -106,7 +106,7 @@
      :headers {"Content-Type" "application/json"}
      :body (json/write-str data)}))
 
-(defn read-post-body [request]
+(defn read-body [request]
   (if (= "application/edn" (:content-type request))
     (read-string (slurp (:body request)))
     (json/read-str (:body request))))
