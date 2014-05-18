@@ -49,12 +49,6 @@
                                     (limit 1)))]
     (:dba-id newest-scrape-item)))
 
-(defn insert-monitor [user-id search-term]
-  (let [existing (mc/find-one-as-map "monitor" {:user-ud user-id :search-term search-term})]
-    (if (nil? existing)
-      (mc/insert "monitor" {:user-id user-id :search-term search-term}))
-    (upsert-scrape search-term)))
-
 (defn get-monitors [user-id]
   (map #(->
          (assoc % :id (str (:_id %)))
@@ -116,11 +110,6 @@
 (defn base-url [request]
   (str "http://" (get (:headers request) "host")))
 
-(defn user-feed [user-id base-url]
-  (let [monitors (get-monitors user-id)]
-    {:user-id user-id
-     :monitors (map #(str base-url "/feed/" (:search-term %)) monitors)}))
-
 (defn- feed-link [feed-base-url rel id]
   {:rel rel :href (str feed-base-url id) :nil (nil? id)})
 
@@ -161,13 +150,6 @@
   (GET "/dingo" request (base-url request))
 
   ;; streams
-  (context "/user/:user-id" [user-id :as request]
-           (GET "/" []
-                (return-data request (user-feed (read-string user-id) (base-url request))))
-           (POST "/" []
-                 (insert-monitor (read-string user-id)
-                                 (:search-term (read-post-body request))) "ok"))
-
   (context "/feed/:search-term" [search-term :as request]
            (GET "/" []
                 (if-not (feed-exists? search-term)
