@@ -1,173 +1,148 @@
 /** @jsx React.DOM */
 
-var Search = React.createClass({
-    getInitialState: function() {
-	return {searchText: "" };
-    },
-    handleSubmit: function() {
-	//console.log(this.refs.searchInput.getDOMNode().value);
-	var val = this.refs.searchInput.getDOMNode().value;
-	this.props.onUserInput(val);
-	return false;
-    },
-    handleChange: function() {
-	var val = this.refs.searchInput.getDOMNode().value;
-	console.log(val);
-        this.setState({searchText: val});
-    },
-    render: function() {
-	if (this.state.searchText == "dingo")
-	    return (
-	    <form onSubmit={this.handleSubmit}>
-		<h3>Search</h3>
-		<input type="text" 
-	               value={this.state.searchText} 
-	               ref="searchInput" 
-	               onChange={this.handleChange}/>
-	    </form>
-	    )
-	else
-	{
-	return (
-	    <form onSubmit={this.handleSubmit}>
-		<h3>Search</h3>
-		<input type="text" 
-	               value={this.state.searchText} 
-	               ref="searchInput" 
-	               onChange={this.handleChange}/>
-		<button>Search</button>
-	    </form>
-	);
-	}
-    }
-});
+var GoogleLoginButton = React.createClass({
+    componentDidMount: function() {
+	// global scope
+	signInCallback = function(authResult) {
+	    console.log("google login");
+	    console.dir(authResult);
+	    this.props.login(authResult);
+	}.bind(this);
 
-var SearchItemRow = React.createClass({
-    render: function() {
+	(function () {
+	    var po = document.createElement('script');
+	    po.type = 'text/javascript';
+	    po.async = true;
+	    po.src = 'https://plus.google.com/js/client:plusone.js?onload=start';
+	    var s = document.getElementsByTagName('script')[0];
+	    s.parentNode.insertBefore(po, s);
+	})();
+    },
+    render: function(){
 	return (
-	    <div className="item">
-		<img className="item-box-left" src={this.props.thumbnail} />
-		<div className="item-box-right">{this.props.text}</div>
-	    </div>	
+	    <div id="signinButton">
+		<span className="g-signin"
+	           data-scope="https://www.googleapis.com/auth/plus.login"
+	           data-clientid="108491861456-g9oajn3u17m0dc6e0fu1o8phoeju2v1d.apps.googleusercontent.com"
+	           data-redirecturi="postmessage"
+	           data-accesstype="online"
+	           data-cookiepolicy="single_host_origin"
+	           data-callback="signInCallback">
+		</span>
+   	    </div>
 	);
     }
 });
 
-var SearchTable = React.createClass({
+var UserNavItem = React.createClass({
     getInitialState: function() {
-	return {searchResults: []};
+	return {username: "", loggedIn: false, userImage: null};
     },
-    onUserInput: function(text) {
-	console.log("Searching for " + text);
-	$.get("http://localhost:3000/search-one?name=" + text, function(data) {
-	    console.dir(data);
-	    this.setState({searchResults: data});
-	}.bind(this));
+    loginSuccess: function(authResult) {
+	var me = this;
+	gapi.auth.setToken(authResult);
+	gapi.client.load('plus','v1', function(){
+	    var request = gapi.client.plus.people.list({
+		'userId': 'me',
+		'collection': 'visible'
+	    });
+	    
+	    var meRequest = gapi.client.plus.people.get({'userId': 'me'});
+	    meRequest.execute(function(resp) {
+		console.dir(resp);
+		me.setState({username: resp.name.givenName, 
+			       loggedIn: true, 
+			       userImage: resp.image.url});
+	    });
 
-	return false;
-    },
-    render: function() { 
-	var rows = [];
-	this.state.searchResults.forEach(function(res) {
-	    rows.push(<SearchItemRow thumbnail={res.thumbnail} 
-		                     text={res.text}/>);
+	    request.execute(function(resp) {
+		//console.log(resp);
+	    });
 	});
+    },
+
+    render: function(){
+	if(this.state.loggedIn) {
+	    return (
+		<div>
+		    <img src={this.state.userImage} />
+ 		</div>
+	    );
+	}
 	return (
-	    <div className="row">
-		<Search onUserInput={this.onUserInput}/>
-		<h3>Search Results</h3>
-		<div className="col-xs-12 col-sm-8 col-md-8 column-1">{rows}</div>
+	    <div>
+		<GoogleLoginButton className="margin-bar" 
+	                           login={this.loginSuccess} ></GoogleLoginButton>
 	    </div>
 	);
     }
 });
 
-var MonitorItem = React.createClass({
+var NavigationBar = React.createClass({
     render: function() {
 	return (
-	    <div className="monitor">
-		<div className="search-term">Monitoring {this.props.searchTerm}</div>
-		<div className="number-of-new-items">{this.props.numberNewItems}</div> new items.
-	    </div>	
-	);
-    }
-});
-
-var MonitorTable = React.createClass({
-    render: function() {
-	var rows = _.map(this.props.monitors, function(item) {
-	    console.log("item " + item);
-	    return <MonitorItem searchTerm={item} 
-		                   numberNewItems={item.numberNewItems} />
-	});
-	return (
-	    <div className="row">
-		<h3>Monitors</h3>
-		<div className="col-xs-12 col-sm-12 col-md-4 column-2">{rows}</div>
-            </div>
-	);
-    }
-});
-
-var App = React.createClass({
-    getInitialState: function() {
-	$.get("http://localhost:3000/user/" + this.props.data.userId, function(data) {
-	    console.dir(data);
- 	    this.setState({monitors: data.monitors});
-	}.bind(this));
-
-	return {monitors: []};
-    },
-    render: function() {
-	return (
-	    <div className="row">
-		<div className="col-xs-12 col-sm-12 col-md-4 column-2">
-		   <MonitorTable monitors={this.state.monitors} />
-		</div>
-            </div>
-	);
-    }
-})
-
-var data = {
-    monitorItems: [{"searchTerm": "fisk", "numberNewItems": 4},
-		   {"searchTerm": "dingo", "numberNewItems": 2}],
-    searchItems: [],
-    userId: 123,
-};
-
-var root = React.renderComponent(<App data={data} />, 
-				 document.getElementById('app'));
-
-
-//var root = React.renderComponent(<MonitorTable monitors={data.monitorItems} />, 
-//				 document.getElementById('monitor'));
-
-//React.renderComponent(<SearchTable searchResults={data.searchItems} />, 
-//		      document.getElementById('app'));
-
-
-var SearchTest = React.createClass({
-    onClick: function() {
-	console.log("Clicked");
-
-	$.get("http://localhost:3000/search-one?name=stokke", function(data) {
-	    console.dir(data);
-	});
-
+	    <div className="navbar navbar-default navbar-fixed-top" role="navigation">
+		<div className="container">
 	
-    },
+		<div className="row">
+  		    <div className="navbar-header">
+		       <a className="navbar-brand" href="#">Deal Hunter</a>
+		    </div>
+		    <div className="collapse navbar-collapse">
 
-    render: function() {
-	return (
-	    <button onClick={this.onClick}>Query</button>
-	);
+               	       <div className="col-sm-6 col-md-6">
+	                  <div className="input-group margin-bar">
+		             <input type="text" className="form-control" 
+		                    placeholder="Search" name="query" value="" />
+		             <div className="input-group-btn">
+		                <button type="submit" className="btn btn-success">
+		                   <span className="glyphicon glyphicon-search"></span>
+		                </button>
+		             </div>
+	                  </div>
+	               </div>
+
+                       <div className="col-sm-2 col-md-2">
+	                 <ul className="nav navbar-nav">
+		           <li className="active"><a href="#">Deals</a></li>
+                         </ul>
+	               </div>
+	    
+	               <ul className="nav navbar-nav navbar-right">
+		         <UserNavItem />
+	               </ul>
+
+	            </div>
+	         </div>
+              </div>
+           </div>
+        );
     }
 });
-React.renderComponent(<SearchTest />, document.getElementById('example'));
+React.renderComponent(<NavigationBar />, document.getElementById('navbar'));
 
 
+function init() {
+    var productRoutes = crossroads.addRoute("section1", function (id) {
+    });
 
+    var default_routes = crossroads.addRoute("/section2", function (source) {
+    });
 
+    crossroads.parse(document.location.pathname); /*This is where the parser function is called to match against the routes defined*/
 
+    crossroads.routed.add(console.log, console);
+}
 
+//setup hasher
+function parseHash(newHash, oldHash){
+  crossroads.parse(newHash);
+}
+hasher.initialized.add(parseHash); //parse initial hash
+hasher.changed.add(parseHash); //parse hash changes
+hasher.init(); //start listening for history change
+ 
+//update URL fragment generating new history record
+hasher.setHash('home');
+
+;$(init);
