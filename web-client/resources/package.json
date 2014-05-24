@@ -13,7 +13,8 @@
     "statics": "~0.1.0",
     "uglify-js": "~2.4.13",
     "watchify": "~0.4.1",
-    "jest-cli": "~0.1.5"
+    "jest-cli": "~0.1.5",
+    "esprima": "~0.9.9"
   },
   "scripts": {
     "start": "STATIC_ROOT=./public watchify -o public/js/bundle.js -v -d .",
