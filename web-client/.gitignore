@@ -9,4 +9,5 @@ pom.xml.asc
 /.lein-*
 /.nrepl-port
 /resources/node_modules
+/resources/public/js/bundle.js
 /resources/public/js/bundle.min.js
