@@ -4,8 +4,6 @@ var GoogleLoginButton = React.createClass({
     componentDidMount: function() {
 	// global scope
 	signInCallback = function(authResult) {
-	    console.log("google login");
-	    console.dir(authResult);
 	    this.props.login(authResult);
 	}.bind(this);
 
@@ -42,25 +40,14 @@ var UserNavItem = React.createClass({
 	var me = this;
 	gapi.auth.setToken(authResult);
 	gapi.client.load('plus','v1', function(){
-	    var request = gapi.client.plus.people.list({
-		'userId': 'me',
-		'collection': 'visible'
-	    });
-	    
-	    var meRequest = gapi.client.plus.people.get({'userId': 'me'});
-	    meRequest.execute(function(resp) {
-		console.dir(resp);
+	    var request = gapi.client.plus.people.get({'userId': 'me'});
+	    request.execute(function(resp) {
 		me.setState({username: resp.name.givenName, 
 			       loggedIn: true, 
 			       userImage: resp.image.url});
 	    });
-
-	    request.execute(function(resp) {
-		//console.log(resp);
-	    });
 	});
     },
-
     render: function(){
 	if(this.state.loggedIn) {
 	    return (
@@ -78,6 +65,38 @@ var UserNavItem = React.createClass({
     }
 });
 
+var SearchBar = React.createClass({
+    getInitialState: function() {
+	return {searchText: "" };
+    },
+    handleSubmit: function() {
+	var val = this.refs.searchInput.getDOMNode().value;
+	//this.props.onUserInput(val);
+	console.log("Submit");
+	return false;
+    },
+    handleChange: function() {
+	var val = this.refs.searchInput.getDOMNode().value;
+	console.log(val);
+        this.setState({searchText: val});
+    },
+    render: function() {
+	return (
+	<div className="input-group margin-bar">
+	    <form onSubmit={this.handleSubmit}>
+		<input type="text" className="form-control" 
+	               placeholder="Search" name="query" value={this.state.searchText} 
+		       onChange={this.handleChange} ref="searchInput" />
+	        <div className="input-group-btn">
+	          <button type="submit" className="btn btn-success">
+	            <span className="glyphicon glyphicon-search"></span>
+	          </button>
+	       </div>
+	    </form>
+	</div>);
+    }
+});
+
 var NavigationBar = React.createClass({
     render: function() {
 	return (
@@ -91,15 +110,7 @@ var NavigationBar = React.createClass({
 		    <div className="collapse navbar-collapse">
 
                	       <div className="col-sm-6 col-md-6">
-	                  <div className="input-group margin-bar">
-		             <input type="text" className="form-control" 
-		                    placeholder="Search" name="query" value="" />
-		             <div className="input-group-btn">
-		                <button type="submit" className="btn btn-success">
-		                   <span className="glyphicon glyphicon-search"></span>
-		                </button>
-		             </div>
-	                  </div>
+	                  <SearchBar />
 	               </div>
 
                        <div className="col-sm-2 col-md-2">
@@ -119,30 +130,50 @@ var NavigationBar = React.createClass({
         );
     }
 });
-React.renderComponent(<NavigationBar />, document.getElementById('navbar'));
+
+var App = React.createClass({
+    getInitialState: function() {
+	return {user: {name: null, image: null},
+		monitors: []}
+    },
+    componentDidMount: function() {
+	crossroads.addRoute("main", function() {
+	    console.log("show home route");
+	});
+	crossroads.addRoute("monitors", function() {
+	    console.log("show monitors");
+	});
+	crossroads.addRoute("monitors/{id}", function(id) {
+	    console.log("show monitor with id " + id);
+	});
+	crossroads.addRoute("search/{term}", function(term) {
+	    console.log("search for term " + term);
+	});
+
+	//setup hasher
+	function parseHash(newHash, oldHash){
+	    console.dir(newHash);
+	    crossroads.parse(newHash);
+	}
+	hasher.initialized.add(parseHash); //parse initial hash
+	hasher.changed.add(parseHash); //parse hash changes
+	hasher.init(); //start listening for history change
+	//crossroads.routed.add(console.log, console);
+
+	//update URL fragment generating new history record
+	hasher.setHash('main');
+    },
+    render: function() {
+	return (
+	    <div>
+		<NavigationBar />
+	    </div>
+	);
+    }
+});
+React.renderComponent(<App />, document.getElementById('deal'));
 
 
-function init() {
-    var productRoutes = crossroads.addRoute("section1", function (id) {
-    });
 
-    var default_routes = crossroads.addRoute("/section2", function (source) {
-    });
 
-    crossroads.parse(document.location.pathname); /*This is where the parser function is called to match against the routes defined*/
 
-    crossroads.routed.add(console.log, console);
-}
-
-//setup hasher
-function parseHash(newHash, oldHash){
-  crossroads.parse(newHash);
-}
-hasher.initialized.add(parseHash); //parse initial hash
-hasher.changed.add(parseHash); //parse hash changes
-hasher.init(); //start listening for history change
- 
-//update URL fragment generating new history record
-hasher.setHash('home');
-
-;$(init);
