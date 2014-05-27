@@ -6,6 +6,15 @@ dealhunter
 
 ### Ubuntu 14.04 WmWare installation
 
+#### Nodejs
+sudo apt-get install nodejs
+
+sudo apt-get install npm
+
+sudo apt-get –purge remove node (in necessary)
+
+sudo ln -s /usr/bin/nodejs /usr/bin/node
+
 #### Docker installation
 http://docs.docker.io/installation/ubuntulinux/
 
