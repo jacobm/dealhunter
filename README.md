@@ -17,6 +17,7 @@ docker pull dockerfile/mongodb
 
 
 mkdir ~/mongo-data
+
 mkdir ~/mongo-data/db
 
 docker run -d -p 27017:27017 -v ~/mongo-data:/data dockerfile/mongodb
