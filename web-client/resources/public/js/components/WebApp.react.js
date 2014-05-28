@@ -3,18 +3,16 @@
 var React = require('react');
 var AppDispatcher = require('../dispatcher/AppDispatcher');
 var AppActions = require('../actions/AppActions');
+var NavigationBar = require('./NavigationBar.react');
 var SearchTextInput = require('./SearchTextInput.react');
 var SearchResultTable = require('./SearchResultTable.react');
 
 var App = React.createClass({
-    onSubmit: function(value) {
-	AppActions.search(value);
-    },
 
     render: function() {
 	return (
 	    <div>
-		<SearchTextInput className="dingo" onSubmit={this.onSubmit} />
+		<NavigationBar />
 		<SearchResultTable />
 	       Dingos
 	    </div>
