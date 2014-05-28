@@ -1,6 +1,7 @@
 /** @jsx React.DOM */ 
 
 var React = require('react');
+var Underscore = require('underscore');
 var AppActions = require('../actions/AppActions');
 var SearchStore = require('../stores/SearchStore');
 
