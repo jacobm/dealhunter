@@ -13,6 +13,7 @@
                  [org.clojure/data.json "0.2.4"]
                  [com.novemberain/monger "1.7.0"]]
   :plugins [[lein-midje "3.1.3"]
-            [lein-ring "0.8.10"]]
+            [lein-ring "0.8.10"]
+            [cider/cider-nrepl "0.7.0-SNAPSHOT"]]
   :ring {:handler dba-scraper.server/app}
   :profiles {:dev {:dependencies [[midje "1.6.3"]]}})
