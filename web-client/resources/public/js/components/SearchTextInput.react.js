@@ -23,6 +23,7 @@ var SearchTextInput = React.createClass({
         onChange={this._onChange}
         onKeyDown={this._onKeyDown}
         value={this.state.value}
+	placeholder="Search"
         autoFocus={true}
       />
     )},
