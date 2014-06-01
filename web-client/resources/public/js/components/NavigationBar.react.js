@@ -3,7 +3,7 @@
 var React = require('react');
 var ReactPropTypes = React.PropTypes;
 var SearchTextInput = require('./SearchTextInput.react');
-var GoogleLoginButton = require('./GoogleLoginButton.react');
+var User = require('./User.react');
 var AppActions = require('../actions/AppActions');
 var UserStore = require('../stores/UserStore');
 
@@ -27,17 +27,38 @@ var NavigationBar = React.createClass({
 
     render: function() {
 	return (
-	<div>
-		{this.state.username}
-	    <img src={this.state.userImage} />
-	    <GoogleLoginButton  />
-	    <SearchTextInput className="dingo" onSubmit={this.onSubmit} />
-	</div>
+      	    <div className="navbar navbar-default navbar-fixed-top" role="navigation">
+		<div className="container">
+	
+		<div className="row">
+  		    <div className="navbar-header">
+		       <a className="navbar-brand" href="#">Deal Hunter</a>
+		    </div>
+		    <div className="collapse navbar-collapse">
+
+               	       <div className="col-sm-6 col-md-6">
+	                  <SearchTextInput onSubmit={this.onSubmit} />
+	               </div>
+
+                       <div className="col-sm-2 col-md-2">
+	                 <ul className="nav navbar-nav">
+		           <li className="active"><a href="#">Deals</a></li>
+                         </ul>
+	               </div>
+	    
+	               <ul className="nav navbar-nav navbar-right">
+		         <User user={this.state.user} />
+	               </ul>
+
+	            </div>
+	         </div>
+              </div>
+           </div>
 	);
     },
 
     _onChange: function() {
-	this.setState(UserStore.getUser());
+	this.setState({user: UserStore.getUser()});
     }
 });
 
