@@ -45,7 +45,7 @@
     :thumbnail-alt image-alt}))
  
 (defn- get-price [item]
-  (let [number (second (s/split (:price item) #"\s+"))]
+  (let [number (first (s/split (:price item) #"\s+"))]
     (if (nil? number)
       0
       (read-string (s/replace number "." "")))))
