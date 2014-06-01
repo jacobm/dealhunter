@@ -1,7 +1,7 @@
 /** @jsx React.DOM */ 
 
 var React = require('react');
-var Underscore = require('underscore');
+var _ = require('underscore');
 var AppActions = require('../actions/AppActions');
 var SearchStore = require('../stores/SearchStore');
 
@@ -20,13 +20,21 @@ var SearchResultTable = React.createClass({
     },
 
     componentWillUnmount: function() {
-	SearchStore.removeChangeListener(this_onChange);
+	SearchStore.removeChangeListener(this._onChange);
     },
     
     render: function() {
+
+	var rows = _.map(this.state.result, function(x) {
+	    return (<li>
+		    {x.text} {x.price} <img src={x.thumbnail} />
+		    </li>
+		   );
+	});
+
 	return (
-		<div>
-		SearchTableResult {this.state.result.length}
+	    <div>
+		 {this.state.result.length} <ul>{rows}</ul>
 	    </div>
 	);
     },
