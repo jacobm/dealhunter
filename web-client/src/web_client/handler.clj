@@ -71,24 +71,47 @@
                                 :search-term (:search-term %)}) monitors)}))
 
 
+(defn wrap-userid-access [handler]
+  (fn [request]
+    (let [path-user (clout/route-matches "/:user-id/searches*" request)
+          session-user-id (:user-id (:session request))]
+      (if (not= (:user-id path-user) session-user-id)
+        {:status 401
+         :body "Access denied"}
+        (handler request)))))
+
+(defroutes user-routes
+  (context "/:user-id/searches" [user-id :as request]
+           (GET "/" []
+                (println "HER")
+                (return-data request {:fisk "fisk"}))
+                ;(return-data request (user-feed (read-string user-id) (base-url request))))
+           ;; [{:replace "last-seen-link" :value "http://localhost/feed/1234"}]
+           (PATCH "/:search" [user-id search :as request] 
+                  (return-data request (read-body request)))
+           (POST "/" []
+                 (insert-search (int (read-string user-id))
+                                (base-url request)
+                                 (:search-term (read-body request))) "ok")))
 
 (defroutes app-routes
   (GET "/" [] (response/resource-response "index.html" {:root "public"}))
 
-  ;; user monitors and position in stream
-  (context "/:user-id/monitors" [user-id :as request]
-           (GET "/" []
-                (return-data request (user-feed (read-string user-id) (base-url request))))
-           ;; [{:replace "last-seen-link" :value "http://localhost/feed/1234"}]
-           (PATCH "/:monitor-id" [user-id monitor-id :as request] 
-                  (return-data request (read-body request)))
-           (POST "/" []
-                 (insert-monitor (int (read-string user-id))
-                                 (base-url request)
-                                 (:search-term (read-body request))) "ok"))
-  
+  (POST "/login" [googleId code :as request] 
+        (return-data request (oauth/google-login googleId code) {:user-id googleId}))
+
+  (GET "/session" [params :as request]
+       (return-data request (:session request))))
+
+(defroutes static-routes  
   (route/resources "/")
   (route/not-found "Not Found"))
+  
 
 (def app
-  (handler/site app-routes))
+  (-> (handler/site 
+       (routes 
+        app-routes
+        (context "/user" [] (wrap-userid-access user-routes))
+        static-routes))
+      session/wrap-session))
