@@ -20,19 +20,19 @@
 (mg/connect! { :host "127.0.0.1" :port 27017 })
 (set-db! (monger.core/get-db "dealhunter-client"))
 
-(defn get-monitors [user-id]
+(defn get-searches [user-id]
   (map #(->
          (assoc % :id (str (:_id %)))
          (dissoc % :_id))
-       (mc/find-maps "monitor" {:user-id user-id})))
+       (mc/find-maps "searches" {:user-id user-id})))
 
-(defn insert-monitor [user-id base-url search-term]
-  (let [existing? (mc/any? "monitor" {:user-id user-id :search-term search-term})]
+(defn insert-search [user-id url search-term]
+  (let [existing? (mc/any? "searches" {:user-id user-id :search-term search-term})]
     (println existing? user-id search-term)
     (if (not existing?)
-      (mc/insert "monitor" {:user-id user-id 
+      (mc/insert "searches" {:user-id user-id 
                             :search-term search-term
-                            :last-seen (str base-url "/feed/" search-term)}))))
+                            :last-seen url}))))
 
 
 ;; === web ===
@@ -65,7 +65,7 @@
    :body (json/write-str data)})
 
 (defn user-feed [user-id base-url]
-  (let [monitors (get-monitors user-id)]
+  (let [monitors (get-searches user-id)]
     {:user-id user-id
      :monitors (map #(identity {:link (str feed-server "/feed/" (:search-term %))
                                 :search-term (:search-term %)}) monitors)}))
