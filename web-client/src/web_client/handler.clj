@@ -30,6 +30,10 @@
   (mc/insert "searches" {:user-id user-id 
                          :search-term search-term}))
 
+(defn set-search-position [user-id search-term url]
+  (mc/insert "positions" {:user-id user-id
+                          :search-term search-term
+                          :position url}))
 
 ;; === web ===
 (defn read-body [request]
