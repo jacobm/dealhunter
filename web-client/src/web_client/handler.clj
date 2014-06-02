@@ -41,15 +41,21 @@
 (defn base-url [request]
   (str "http://" (get (:headers request) "host")))
 
-(defn return-data [request data]
-  (if (= "application/edn" (:content-type request))
-    {:status 200
-     :headers {"Content-Type" "application/edn"}
-     :body (pr-str data)}
-    {:status 200
-     :headers {"Content-Type" "application/json"}
-     :body (json/write-str data)}))
-
+(defn return-data 
+  ([request data] (return-data request data nil))
+  ([request data session]
+     (let [reply
+           (if (= "application/edn" (:content-type request))
+             {:status 200
+              :headers {"Content-Type" "application/edn"}
+              :body (pr-str data)}
+             {:status 200
+              :headers {"Content-Type" "application/json"}
+              :body (json/write-str data)})]
+       (if (not (nil? session))
+         (assoc reply :session session)
+         reply))))
+  
 (defn return-json [data]
   {:status 200
    :headers {"Content-Type" "application/json"}
