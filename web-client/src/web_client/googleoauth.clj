@@ -18,7 +18,7 @@
 
 ;https://developers.google.com/accounts/docs/OAuth2WebServer
 
-(defn google-login [google-id code]
+(defn is-google-login-ok? [google-id code]
   (let [options {:form-params {"code" code
                                "client_id" (:client-id google-com-oauth2)
                                "client_secret" (:client-secret google-com-oauth2)

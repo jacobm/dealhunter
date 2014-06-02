@@ -83,22 +83,18 @@
 (defroutes user-routes
   (context "/:user-id/searches" [user-id :as request]
            (GET "/" []
-                (println "HER")
-                (return-data request {:fisk "fisk"}))
-                ;(return-data request (user-feed (read-string user-id) (base-url request))))
-           ;; [{:replace "last-seen-link" :value "http://localhost/feed/1234"}]
-           (PATCH "/:search" [user-id search :as request] 
-                  (return-data request (read-body request)))
-           (POST "/" []
-                 (insert-search (int (read-string user-id))
-                                (base-url request)
-                                 (:search-term (read-body request))) "ok")))
+                (return-data request (get-searches (read-string user-id))))
+           (POST "/:search-term" [search-term]
+                 (append-search (int (read-string user-id)) search-term) "ok")
+           (POST "/:search-term/:url" [search-term url :as request] 
+                  (return-data request (read-body request)))))
+
 
 (defroutes app-routes
   (GET "/" [] (response/resource-response "index.html" {:root "public"}))
 
   (POST "/login" [googleId code :as request] 
-        (return-data request (oauth/google-login googleId code) {:user-id googleId}))
+        (return-data request (oauth/is-google-login-ok? googleId code) {:user-id googleId}))
 
   (GET "/session" [params :as request]
        (return-data request (:session request))))
