@@ -26,13 +26,9 @@
          (dissoc % :_id))
        (mc/find-maps "searches" {:user-id user-id})))
 
-(defn insert-search [user-id url search-term]
-  (let [existing? (mc/any? "searches" {:user-id user-id :search-term search-term})]
-    (println existing? user-id search-term)
-    (if (not existing?)
-      (mc/insert "searches" {:user-id user-id 
-                            :search-term search-term
-                            :last-seen url}))))
+(defn append-search [user-id search-term]
+  (mc/insert "searches" {:user-id user-id 
+                         :search-term search-term}))
 
 
 ;; === web ===
