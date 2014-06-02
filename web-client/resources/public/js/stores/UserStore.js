@@ -16,7 +16,11 @@ function getUserData(authResult) {
 	    _user = {username: resp.name.givenName, 
 		     loggedIn: true, 
 		     userImage: resp.image.url};
-	    UserStore.emitChange();
+            $.post('login', {googleId: resp.id, code: authResult.code}, function(loginOk) {
+                if (loginOk) {
+	            UserStore.emitChange();
+                }
+            });
 	});
     });
 };
