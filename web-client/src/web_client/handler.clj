@@ -1,13 +1,16 @@
 (ns web-client.handler
   (:use compojure.core)
   (:require [ring.util.response :as response]
+            [ring.middleware.session :as session]
+            [clout.core :as clout]
             [compojure.handler :as handler]
             [compojure.route :as route]
             [clojure.data.json :as json]
             [monger.core :as mg :refer [connect! set-db! get-db]]
             [monger.collection :as mc :refer [insert insert-batch]]
             [monger.operators :refer [$lte $gt $lt $gte]]
-            [monger.query :as mq]))
+            [monger.query :as mq]
+            [web-client.googleoauth :as oauth]))
 
 ;; === configuration ===
 (def feed-server "http://localhost:3000")
