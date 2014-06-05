@@ -2,7 +2,6 @@
   (:require [org.httpkit.client :as http]
             [clojure.data.json :as json]))
 
-
 (def oauth-uri "https://accounts.google.com/o/oauth2/token")
 (def people-url "https://www.googleapis.com/plus/v1/people/");
 
@@ -34,15 +33,3 @@
           (= google-id (:id (json/read-json body true)))
           false))
       false)))
-        
-    
-    
-
-
-
-
-
-
-
-  
-  
