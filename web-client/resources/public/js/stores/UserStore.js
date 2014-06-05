@@ -15,7 +15,9 @@ function getUserData(authResult) {
 	request.execute(function(resp) {
 	    _user = {username: resp.name.givenName, 
 		     loggedIn: true, 
-		     userImage: resp.image.url};
+		     userImage: resp.image.url,
+                     id: resp.id
+                    };
             $.post('login', {googleId: resp.id, code: authResult.code}, function(loginOk) {
                 if (loginOk) {
 	            UserStore.emitChange();
