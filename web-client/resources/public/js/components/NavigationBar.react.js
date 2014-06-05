@@ -21,10 +21,6 @@ var NavigationBar = React.createClass({
 	UserStore.removeChangeListener(this._onChange);
     },
 
-    onSubmit: function(value) {
-	AppActions.search(value);
-    },
-
     render: function() {
 	return (
       	    <div className="navbar navbar-default navbar-fixed-top" role="navigation">
@@ -36,17 +32,7 @@ var NavigationBar = React.createClass({
 		    </div>
 		    <div className="collapse navbar-collapse">
 
-               	       <div className="col-sm-6 col-md-6">
-	                  <SearchTextInput onSubmit={this.onSubmit} />
-	               </div>
-
-                       <div className="col-sm-2 col-md-2">
-	                 <ul className="nav navbar-nav">
-		           <li className="active"><a href="#">Deals</a></li>
-                         </ul>
-	               </div>
-	    
-	               <ul className="nav navbar-nav navbar-right">
+ 	               <ul className="nav navbar-nav navbar-right">
 		         <User user={this.state.user} />
 	               </ul>
 
