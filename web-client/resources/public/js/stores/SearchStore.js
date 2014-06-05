@@ -75,8 +75,16 @@ var SearchStore = merge(EventEmitter.prototype, {
      */
     removeChangeListener: function(callback) {
 	this.removeListener(CHANGE_EVENT, callback);
+    },
+
+    listenForUserLogin: function() {
+        _search.user = UserStore.getUser();
+        setPreviousSearches(_search.user.id);
     }
 });
+
+UserStore.addChangeListener(SearchStore.listenForUserLogin);
+
 
 AppDispatcher.register(function(payload) {
     var action = payload.action;
