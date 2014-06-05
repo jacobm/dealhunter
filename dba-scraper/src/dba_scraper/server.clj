@@ -132,11 +132,11 @@
         count (get-count search-term)
         next (get-next (str (:_id oldest)) search-term)
         feed-base-url (str base-url "/feed/" search-term "/")
-        item (assoc (dissoc oldest :_id) :count count)
-        self-link  (feed-link feed-base-url "self" (:_id oldest))
+        item {:count count}
+        self-link  {:rel "self" :href (str feed-base-url "/feed/" search-term)}
         first-link (feed-link feed-base-url "oldest" (:_id oldest))
         last-link  (feed-link feed-base-url "newest" (:_id newest))
-        next-link  (feed-link feed-base-url "next" (:_id next))]
+        next-link  (feed-link feed-base-url "next" (:_id oldest))]
       (assoc item :_links (build-links self-link next-link first-link last-link))))
 
 (defn feed-item [base-url id search-term]
