@@ -85,20 +85,20 @@ module Persistence =
     open Newtonsoft.Json
     open ScraperTypes
     open WebTypes
-    
-    let getConnection() = 
+
+    let getConnection (connectionString :string) = 
         let connection = 
-            new NpgsqlConnection("User ID=scraper;Password=dingo;Host=localhost;Port=5432;Database=scrape;Pooling=true;")
+            new NpgsqlConnection(connectionString)
         connection.Open()
         connection
     
-    let dropTables() = 
-        use connection = getConnection()
-        let command = new NpgsqlCommand(@"drop table listings;")
+    let dropTables connectionString = 
+        use connection = getConnection connectionString
+        let command = new NpgsqlCommand(@"drop table listings;", connection)
         command.ExecuteNonQuery
     
-    let createTables() = 
-        use connection = getConnection()
+    let createTables connectionString = 
+        use connection = getConnection connectionString
         let command = new NpgsqlCommand(@"
             CREATE TABLE listings (
                 id SERIAL PRIMARY KEY, 
@@ -108,11 +108,11 @@ module Persistence =
                 data JSON NOT NULL);", connection)
         command.ExecuteNonQuery()
     
-    let saveListing searchTerm (listing : Listing) = 
+    let saveListing connectionString searchTerm (listing : Listing) = 
         let (SearchTerm term) = searchTerm
         let (DbaId dbaId) = listing.dbaId
         let json = JsonConvert.SerializeObject listing
-        use connection = getConnection()
+        use connection = getConnection connectionString
         use command = new NpgsqlCommand(@"
             INSERT INTO listings (search_term, listing_id, dba_id, data) 
             VALUES (@searchTerm, @listingId, @dbaId, @json)", connection)
@@ -122,8 +122,8 @@ module Persistence =
         command.Parameters.AddWithValue("@listingId", Guid.NewGuid()) |> ignore
         command.ExecuteNonQuery()
     
-    let findListing (listingId : Guid) : Listing option = 
-        use connection = getConnection()
+    let findListing connectionString (listingId : Guid) : Listing option = 
+        use connection = getConnection connectionString
         use command = new NpgsqlCommand(@"SELECT data FROM listings WHERE listing_id = @listingId", connection)
         command.Parameters.AddWithValue("@listingId", NpgsqlDbType.Uuid, listingId) |> ignore
         use reader = command.ExecuteReader()
@@ -131,9 +131,9 @@ module Persistence =
         | true -> Some(JsonConvert.DeserializeObject<Listing>(reader.GetString(0)))
         | _ -> None
     
-    let findLatest (searchTerm : SearchTerm) : Listing option = 
+    let findLatest connectionString (searchTerm : SearchTerm) : Listing option = 
         let (SearchTerm term) = searchTerm
-        use connection = getConnection()
+        use connection = getConnection connectionString
         use command = new NpgsqlCommand(@"
             SELECT data FROM listings 
             WHERE search_term = @searchTerm
@@ -145,10 +145,10 @@ module Persistence =
         | true -> Some(JsonConvert.DeserializeObject<Listing>(reader.GetString(0)))
         | _ -> None
     
-    let find (searchTerm : SearchTerm) : Listing seq = 
+    let find connectionString (searchTerm : SearchTerm) : Listing seq = 
         seq { 
             let (SearchTerm term) = searchTerm
-            use connection = getConnection()
+            use connection = getConnection connectionString
             use command = 
                 new NpgsqlCommand(@"SELECT data FROM listings WHERE search_term = @searchTerm order by id", connection)
             command.Parameters.AddWithValue("@searchTerm", term) |> ignore
@@ -157,9 +157,9 @@ module Persistence =
                 yield JsonConvert.DeserializeObject<Listing>(reader.GetString(0))
         }
     
-    let findFeedStart (searchTerm : SearchTerm) : FeedStart = 
+    let findFeedStart connectionString (searchTerm : SearchTerm) : FeedStart = 
         let (SearchTerm term) = searchTerm
-        use connection = getConnection()
+        use connection = getConnection connectionString
         use command = new NpgsqlCommand(@"
             SELECT listing_id FROM listings 
             WHERE search_term = @searchTerm 
@@ -176,9 +176,9 @@ module Persistence =
             | false -> OneItemFeed(TipId tip)
             | true -> OldestAndTip(OldestId(reader.GetGuid(0)), (TipId tip))
     
-    let findFeedItem (searchTerm : SearchTerm) (itemId : Guid) : FeedItem = 
+    let findFeedItem connectionString (searchTerm : SearchTerm) (itemId : Guid) : FeedItem = 
         let (SearchTerm term) = searchTerm
-        use connection = getConnection()
+        use connection = getConnection connectionString
         use command = new NpgsqlCommand(@"
             WITH linked_list AS (SELECT 
 	                listing_id, 
