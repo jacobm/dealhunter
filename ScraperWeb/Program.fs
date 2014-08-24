@@ -49,6 +49,7 @@ module JsonFeedConversion =
 
 module WebFeed = 
     open System
+    open System.Threading
     open System.Text
     open Nancy
     open Nancy.Hosting.Self
@@ -57,7 +58,8 @@ module WebFeed =
     open ScraperCommon.WebTypes
     open Newtonsoft.Json
     open JsonFeedConversion
-    
+    open ScraperCommon.Settings
+
     let (?) (parameters : obj) param = (parameters :?> Nancy.DynamicDictionary).[param]
     let serialize item = 
         JsonConvert.SerializeObject(item, Formatting.Indented, new FeedConverter(), new DbaIdConverter())
@@ -88,6 +90,8 @@ module WebFeed =
     type HelloModule() as self = 
         inherit NancyModule()
         
+        let connectionString = "User ID=Scraper;Password=dingo;Host=localhost;Port=5432;Database=Scraper;Pooling=true;"
+
         do 
             self.Get.["/{searchTerm}"] <- fun parameters -> 
                 let searchTerm = (parameters?searchTerm).ToString()
@@ -100,7 +104,7 @@ module WebFeed =
                 let link = self.GetLink feedBaseUrl
                 
                 let feed = 
-                    match (SearchTerm searchTerm) |> findFeedStart with
+                    match (SearchTerm searchTerm) |> findFeedStart connectionString with
                     | EmptyFeed -> { _links = [| selfLink |] }
                     | OneItemFeed(TipId id) -> 
                         { _links = 
@@ -128,7 +132,7 @@ module WebFeed =
                     match Guid.TryParse(itemId, id) with
                     | false -> errorResponse HttpStatusCode.BadRequest "Invalid listing id"
                     | true -> 
-                        let feedItem = findFeedItem (SearchTerm searchTerm) id.Value
+                        let feedItem = findFeedItem connectionString (SearchTerm searchTerm) id.Value
                         match feedItem with
                         | NotFound -> notFoundResponse()
                         | LonelyTip item -> 
@@ -162,39 +166,46 @@ module WebFeed =
             { linkName = name
               href = sprintf "%s/%s" feedBaseUrl (id.ToString()) }
     
-    let buildDb() = 
-        dropTables() |> ignore
-        let create = createTables()
+    let buildDb connectionString = 
+        dropTables connectionString |> ignore
+        let create = createTables connectionString
         
         let result = 
-            saveListing (SearchTerm "stokke") { text = "testing like a boss"
-                                                dbaId = (DbaId "12gf")
-                                                thumbnail = Some(new Uri("http://localhost/image"))
-                                                price = 200
-                                                dbaLink = new Uri("http://localhost/link")
-                                                location = 
-                                                    { postcode = 2300
-                                                      city = "Amager" }
-                                                postedAt = DateTime.Now }
+            saveListing "" (SearchTerm "stokke") 
+                            { text = "testing like a boss"
+                              dbaId = (DbaId "12gf")
+                              thumbnail = Some(new Uri("http://localhost/image"))
+                              price = 200
+                              dbaLink = new Uri("http://localhost/link")
+                              location = 
+                                { postcode = 2300
+                                  city = "Amager" }
+                              postedAt = DateTime.Now }
         
-        let res = find (SearchTerm "stokke")
-        let fisk = findListing (Guid.Parse("6426fe91-0964-4d22-831c-abcf8551a811"))
+        let res = find connectionString (SearchTerm "stokke")
+        let fisk = findListing connectionString (Guid.Parse("6426fe91-0964-4d22-831c-abcf8551a811"))
         ()
-    
+
     [<EntryPoint>]
     let main args = 
-        let item = findFeedStart (SearchTerm "stokke")
-        let feed2 = findFeedStart (SearchTerm "notfound")
+        let connectionString = "User ID=Scraper;Password=dingo;Host=localhost;Port=5432;Database=Scraper;Pooling=true;"
+        let item = findFeedStart connectionString (SearchTerm "stokke")
+        let feed2 = findFeedStart connectionString (SearchTerm "notfound")
         let id = Guid.Parse("5231ab0c-b231-472f-9412-806a57da74df")
-        let oldestItem = findFeedItem (SearchTerm "stokke") id
+        let oldestItem = findFeedItem connectionString (SearchTerm "stokke") id
         let id = Guid.Parse("e14dfbbf-354d-4183-981d-a0c6db8e12c4")
-        let bodyItem = findFeedItem (SearchTerm "stokke") id
+        let bodyItem = findFeedItem connectionString (SearchTerm "stokke") id
         let id = Guid.Parse("21f06d23-cd46-4240-9445-c62f5fd4a93d")
-        let tipItem = findFeedItem (SearchTerm "stokke") id
-        let latest = findLatest (SearchTerm "stokke")
+        let tipItem = findFeedItem connectionString (SearchTerm "stokke") id
+        let latest = findLatest connectionString (SearchTerm "stokke")
         let nancyHost = new NancyHost(new Uri("http://localhost:8888/"), new Uri("http://127.0.0.1:8888/"))
         nancyHost.Start()
         printfn "ready..."
-        Console.ReadKey()
+
+        if Array.Exists(args, (fun s -> s.Equals("-d", StringComparison.CurrentCultureIgnoreCase))) then
+            Thread.Sleep(Timeout.Infinite);
+        else
+            Console.ReadKey() |> ignore
+        
         nancyHost.Stop()
         0
