@@ -82,26 +82,155 @@ module Crawler =
     
 
 module FetcherRobot = 
+    open System
+    open System.Collections
+    open System.ServiceProcess
     open Crawler
+    open Settings
+    open Riemann
+    open EasyNetQ
+    open etcetera
+    open Logging
 
-    
-    let partialImport (searchTerm : SearchTerm) : unit = 
-        let item = Persistence.find searchTerm |> Seq.head
-        let temp = importUntilDbaId searchTerm (Some item.dbaId) |> Seq.toList
-        Console.WriteLine("her-------------")
-        Seq.iter (fun x -> 
-            let (DbaId id) = x.dbaId
-            Console.WriteLine(id)) temp
-        Seq.iter (fun item -> Persistence.saveListing searchTerm item |> ignore) temp
-        ()
-    
-    [<EntryPoint>]
-    let main argv = 
+    type ScrapeRequest = { term : string }
+
+    let receiveSeachRequest request : SearchTerm =
+        SearchTerm request
+
+    let findCurrent connectionString (searchTerm : SearchTerm) =
+        match Persistence.findLatest connectionString searchTerm with
+        | None -> (searchTerm, None)
+        | Some it -> (searchTerm, Some it.dbaId)
+
+    let persistListings connectionString (searchTerm : SearchTerm, listings : Listing seq) =
+        let saveItem item = Persistence.saveListing connectionString searchTerm item |> ignore
+        listings |> Seq.iter saveItem
+
+    let listen connectionString handleFunc : unit =
+        use bus = RabbitHutch.CreateBus(connectionString)
+        bus.Subscribe<ScrapeRequest>("Scraper", handleFunc) |> ignore
+        Console.WriteLine("Press any key to exit")
+        Console.ReadKey() |> ignore
+        while true do
+            Thread.Sleep(1000)
+        
+
+        
+
+    let start unit : int =     
         // make sure Okt is parsed as October
         Thread.CurrentThread.CurrentCulture <- new CultureInfo("da-DK")
+        Console.WriteLine("Starting")
+        let env = Environment.GetEnvironmentVariables()
+        
+        for entry in env |> Seq.cast<DictionaryEntry> do
+            let line = entry.Key.ToString() + ": " + entry.Value.ToString()
+            Console.WriteLine(line)
 
-        let searchTerm = (SearchTerm "stokke")
-        let dbaId = Some (DbaId "1008630748")
-        let import = importUntilDbaId searchTerm None
-        import |> List.iter (fun item -> Console.WriteLine(item.postedAt))
+  
+
+        //let etcdClient = new EtcdClient(new Uri("http://localhost:4001/v2/keys/"))
+        //let rabbitConnectionString = etcdClient.Get("connectionStrings/rabbit").Node.Value
+        //let postgreConnectionString = etcdClient.Get("connectionStrings/postgres").Node.Value
+        //let riemannHost = etcdClient.Get("connectionStrings/riemann").Node.Value
+        
+        let getEnvValue name defaultValue =
+            match Environment.GetEnvironmentVariable(name) with
+            | null -> defaultValue
+            | some -> some
+        
+        let rabbitHost = getEnvValue "RABBIT_PORT_5672_TCP_ADDR" "localhost"
+        let rabbitConnectionString = "amqp://guest:guest@" + rabbitHost
+        
+        let postgreHost = getEnvValue "SCRAPERDB_PORT_5432_TCP_ADDR" "localhost"
+        let postgreConnectionString = getEnvValue "postgre" "User ID=Scraper;Password=dingo;Host=" + postgreHost + ";Port=5432;Database=Scraper;"
+        
+        //Persistence.createTables postgreConnectionString
+
+        let riemannHost = getEnvValue "RIEMANN_PORT_5555_UDP_ADDR" "localhost"
+        
+        Console.WriteLine(rabbitConnectionString)
+        Console.WriteLine(postgreConnectionString)
+        Console.WriteLine(riemannHost)
+                
+        let client = new Client(riemannHost, 5555, true)
+        let log = Logging.logStatus client "Scraper"
+        
+        log "Starting up scraper"
+        
+        use bus = RabbitHutch.CreateBus(rabbitConnectionString)
+        bus.Publish<ScrapeRequest>({term = "bliss" })
+        
+        
+        log ("Rabbit: " + rabbitConnectionString) 
+        log ("Postgre: " + postgreConnectionString) 
+
+
+//        let r = new Random()
+//        while true do
+//            let it = r.Next()
+//            client.SendEvent("Scraper", "info", "description", (float32)it)
+//            Thread.Sleep(400)
+
+        //ScraperCommon.Persistence.createTables postgreConnectionString |> ignore
+
+        //let items = Persistence.find postgreConnectionString (SearchTerm "dingo")
+
+        let logCurrent item  : SearchTerm * DbaId option =
+            let it = match item with
+                    | (SearchTerm _, None) -> log "Fresh import"
+                    | (SearchTerm _, Some (DbaId x)) -> log ("Importing from " + x)
+            item
+
+        let logImportedItems (SearchTerm term, listings) =
+            match listings with
+            | [] -> log "no new items"
+            | _ -> listings |> List.iter (fun it -> log (term + ": " + it.text)) 
+            (SearchTerm term, listings)
+    
+        let ignoreSaveError saveFunc =
+            let save (searchTerm : SearchTerm, listings : Listing list) =
+                try
+                    saveFunc (searchTerm, listings)
+                with :? System.Exception -> log "possible double import, ignoring this import"
+            save
+
+        listen rabbitConnectionString
+            (Action<ScrapeRequest> (fun request -> 
+                                 log ("Received " + request.term)
+
+                                 let saveFunc = persistListings postgreConnectionString
+
+                                 request.term
+                                 |> receiveSeachRequest 
+                                 |> findCurrent postgreConnectionString
+                                 |> logCurrent
+                                 |> import 
+                                 |> logImportedItems
+                                 |> ignoreSaveError saveFunc
+                                 log "import finished" ))
+   
+        Console.ReadKey() |> ignore
+      
         0 // return an integer exit code
+    
+    type ScraperService() = 
+        inherit ServiceBase(ServiceName = "ScraperService")
+
+        override self.OnStart (args : string[]) =
+            self.CanShutdown <- true
+            self.CanStop <- true
+            self.CanPauseAndContinue <- false
+            start() |> ignore
+            ()
+
+        override self.OnStop() =
+            ()
+
+        override self.OnShutdown() = 
+            self.OnStop()
+
+    [<EntryPoint>]
+    let main argv = 
+        start()
+
