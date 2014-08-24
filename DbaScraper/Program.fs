@@ -10,6 +10,15 @@ open ScraperCommon
 open ScraperCommon.ScraperTypes
 open Scrape
 
+module Logging = 
+    open Riemann
+
+    let log (client : Client) service state description metric  =     
+        client.SendEvent(service, state, description, metric)
+    
+    let logStatus (client : Client) service description =
+        log client service "status" description 1.0f
+
 module Crawler = 
     open Scrape
 
