@@ -1,5 +1,28 @@
 ﻿namespace ScraperCommon
 
+module Settings =
+    open System
+    open System.Configuration
+    open System.ComponentModel
+
+    let exists (key : string) : bool =
+        ConfigurationManager.AppSettings.[key] <> null
+
+    let inline get (key : string) : string =
+        if exists key 
+           then ConfigurationManager.AppSettings.Get(key)
+           else raise (ArgumentException("key " + key + " was not found"))
+
+    let inline getOrDefault key defaultValue =
+        if exists key
+           then get key
+           else defaultValue
+
+    let inline getConnectionString (key : string) =
+        if ConfigurationManager.ConnectionStrings.[key] <> null
+           then ConfigurationManager.ConnectionStrings.[key].ConnectionString
+           else raise (ArgumentException("key " + key + " was not found"))
+
 module ScraperTypes = 
     open System
     
