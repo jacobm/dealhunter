@@ -50,7 +50,7 @@ let parseDate (value : string) : DateTime =
         match parseDbaDate s with
         | Some(day, month) -> 
             let dateString = sprintf "%d %s %d" day month DateTime.Now.Year
-            DateTime.ParseExact(dateString, "d MMM yyyy", Globalization.CultureInfo.CurrentCulture)
+            DateTime.ParseExact(dateString, "d MMM yyyy",  new Globalization.CultureInfo("da-DK"))
         | None -> DateTime.MinValue
     match value.Trim() with
     | "I dag" -> DateTime.Today.Date

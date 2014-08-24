@@ -48,7 +48,9 @@ module Crawler =
                    | true -> update it listings (year - 1)
             | _ -> update it listings (year - 1)
 
-        let lastDayOfYear = DateTime.Parse(sprintf "31. 12 %i" DateTime.Now.Year)
+        let lastDayOfYear = DateTime.ParseExact(sprintf "31-12-%i" DateTime.Now.Year, "dd-MM-yyyy", CultureInfo.CurrentCulture)
+        Console.WriteLine(lastDayOfYear)
+
         let listings, _, _ = Seq.fold assignMonths (List.empty, lastDayOfYear, DateTime.Now.Year) listings
         listings |> List.rev
     
