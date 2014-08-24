@@ -35,10 +35,10 @@ module Crawler =
     let crawl (SearchTerm searchTerm) : (Uri * Html) seq =
         let frontPageUrl = getFrontPageUrl searchTerm
         seq {
-            //let front = frontPageUrl |> fetch
-            //let numberOfPages = Scrape.getNumberOfPages (snd front)
-            //yield front 
-            for x in 46..50 do
+            let front = frontPageUrl |> fetch
+            let numberOfPages = Scrape.getNumberOfPages (snd front)
+            yield front 
+            for x in 2..numberOfPages do
                 let page = x |> getPageUrl searchTerm
                 yield page |> fetch 
         }
