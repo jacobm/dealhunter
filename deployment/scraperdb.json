@@ -1,0 +1,23 @@
+{
+    "id": "scraperdb",
+    "kind": "Pod",
+    "apiVersion": "v1beta1",
+    "desiredState": {
+	"manifest": {
+	    "version": "v1beta1",
+	    "id": "scraper-test",
+	    "containers": [{
+		"name": "postgres",
+		"image": "postgres",
+		"ports": [{
+		    "name": "postgres",
+		    "containerPort": 5432,
+		    "hostPort": 5432
+		}]
+	    }]
+	}
+    },
+    "labels": {
+	"name": "scraper"
+    }
+}

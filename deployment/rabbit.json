@@ -1,0 +1,56 @@
+{
+    "id": "dealhunter",
+    "kind": "Pod",
+    "apiVersion": "v1beta1",
+    "desiredState": {
+	"manifest": {
+	    "version": "v1beta1",
+	    "id": "rabbit-test",
+	    "containers": [{
+		"name": "rabbit",
+		"image": "jacobm/rabbitmq",
+		"ports": [{
+		    "name": "amqp",
+		    "containerPort": 5672,
+		    "hostPort": 5672
+		}, {
+		    "name": "management",
+		    "containerPort": 15672,
+		    "hostPort": 15672
+		}]
+	    },{
+		"name": "riemann",
+		"image": "davidkelley/riemann",
+		"ports": [{
+		    "name": "riemann-udp",
+		    "containerPort": 5555,
+		    "hostPort": 5555,
+		    "protocol": "UDP"
+		}, {
+		    "name": "riemann-websocket",
+		    "containerPort": 5556,
+		    "hostPort": 5556
+		}]
+	    }, {
+		"name": "riemann-dash",
+		"image": "davidkelley/riemann-dash",
+		"ports": [{
+		    "name": "riemann-dash",
+		    "containerPort": 4567,
+		    "hostPort": 4567
+		}]
+	    }, {
+		"name": "postgres",
+		"image": "postgres",
+		"ports": [{
+		    "name": "postgres",
+		    "containerPort": 5432,
+		    "hostPort": 5432
+		}]
+	    }]
+	}
+    },
+    "labels": {
+	"name": "scraper"
+    }
+}

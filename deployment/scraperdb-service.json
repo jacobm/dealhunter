@@ -1,0 +1,9 @@
+{
+  "id": "scraperdbservice",
+  "kind": "Service",
+  "apiVersion": "v1beta1",
+  "port": 15432,
+  "selector": {
+    "name": "scraper"
+  }
+}

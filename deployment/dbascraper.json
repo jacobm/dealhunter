@@ -1,0 +1,18 @@
+{
+    "id": "scraperrobot",
+    "kind": "Pod",
+    "apiVersion": "v1beta1",
+    "desiredState": {
+	"manifest": {
+	    "version": "v1beta1",
+	    "id": "scraper-robot",
+	    "containers": [{
+		"name": "scraperrobot",
+		"image": "jacobm/dba-scraper",
+	    }]
+	}
+    },
+    "labels": {
+	"name": "scraperrobot"
+    }
+}
