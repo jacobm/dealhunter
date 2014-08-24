@@ -76,6 +76,9 @@ module Crawler =
 
     let importUntilDbaId (searchTerm : SearchTerm) dbaId = 
         extractListings (crawl searchTerm) dbaId
+
+    let import (searchTerm, dbaId) =
+        (searchTerm, extractListings (crawl searchTerm) dbaId)
     
 
 module FetcherRobot = 
