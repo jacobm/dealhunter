@@ -11,5 +11,14 @@ pom.xml.asc
 .lein-failures
 */bin/Debug
 *.suo
-*/obj/Debug
+*/bin/Debug
+*/bin/Release
+*obj
+.cache
+.Xauthority
+.bash_history
+.compiz
+.config
+.mozilla
+DbaScraper.userprefs
 packages
