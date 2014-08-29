@@ -167,7 +167,7 @@ module Persistence =
             WHERE search_term = @searchTerm 
             AND id = (SELECT MAX(id) FROM listings WHERE search_term = @searchTerm)
             OR id = (SELECT MIN(id) FROM listings WHERE search_term = @searchTerm)
-            ORDER BY id DESC", connection)
+            ORDER BY id", connection)
         command.Parameters.AddWithValue("@searchTerm", term) |> ignore
         use reader = command.ExecuteReader()
         match reader.Read() with
@@ -185,9 +185,10 @@ module Persistence =
             WITH linked_list AS (SELECT 
 	                listing_id, 
 	                data, 
-	                LAG(listing_id) OVER (ORDER BY id) AS prev,
-	                LEAD(listing_id) OVER (ORDER BY id) AS next
-                 FROM listings)
+	                LAG(listing_id) OVER (ORDER BY id) AS next,
+	                LEAD(listing_id) OVER (ORDER BY id) AS prev
+                 FROM listings
+                 WHERE search_term = @searchTerm)
             SELECT 
                     listing_id, 
 	                data, 
