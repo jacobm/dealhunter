@@ -4,11 +4,8 @@ open System
 open System.Threading
 open System.Globalization
 open FSharp.Data
-open System.Net
-open System.Net.Cache
 open ScraperCommon
 open ScraperCommon.ScraperTypes
-open Scrape
 
 module Logging = 
     open Riemann
@@ -89,10 +86,9 @@ module FetcherRobot =
     open Settings
     open Riemann
     open EasyNetQ
-    open etcetera
     open Logging
-
-    type ScrapeRequest = { term : string }
+    open Settings
+    open ScraperCommon.ScraperTypes
 
     let receiveSeachRequest request : SearchTerm =
         SearchTerm request
@@ -127,26 +123,12 @@ module FetcherRobot =
             let line = entry.Key.ToString() + ": " + entry.Value.ToString()
             Console.WriteLine(line)
 
-  
-
-        //let etcdClient = new EtcdClient(new Uri("http://localhost:4001/v2/keys/"))
-        //let rabbitConnectionString = etcdClient.Get("connectionStrings/rabbit").Node.Value
-        //let postgreConnectionString = etcdClient.Get("connectionStrings/postgres").Node.Value
-        //let riemannHost = etcdClient.Get("connectionStrings/riemann").Node.Value
-        
-        let getEnvValue name defaultValue =
-            match Environment.GetEnvironmentVariable(name) with
-            | null -> defaultValue
-            | some -> some
-        
         let rabbitHost = getEnvValue "RABBIT_PORT_5672_TCP_ADDR" "localhost"
         let rabbitConnectionString = "amqp://guest:guest@" + rabbitHost
         
         let postgreHost = getEnvValue "SCRAPERDB_PORT_5432_TCP_ADDR" "localhost"
         let postgreConnectionString = getEnvValue "postgre" "User ID=Scraper;Password=dingo;Host=" + postgreHost + ";Port=5432;Database=Scraper;"
         
-        //Persistence.createTables postgreConnectionString
-
         let riemannHost = getEnvValue "RIEMANN_PORT_5555_UDP_ADDR" "localhost"
         
         Console.WriteLine(rabbitConnectionString)
@@ -164,17 +146,6 @@ module FetcherRobot =
         
         log ("Rabbit: " + rabbitConnectionString) 
         log ("Postgre: " + postgreConnectionString) 
-
-
-//        let r = new Random()
-//        while true do
-//            let it = r.Next()
-//            client.SendEvent("Scraper", "info", "description", (float32)it)
-//            Thread.Sleep(400)
-
-        //ScraperCommon.Persistence.createTables postgreConnectionString |> ignore
-
-        //let items = Persistence.find postgreConnectionString (SearchTerm "dingo")
 
         let logCurrent item  : SearchTerm * DbaId option =
             let it = match item with

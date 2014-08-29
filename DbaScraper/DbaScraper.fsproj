@@ -5,7 +5,7 @@
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
     <SchemaVersion>2.0</SchemaVersion>
-    <ProjectGuid>75b41aea-4f05-413c-b383-a128e8672b05</ProjectGuid>
+    <ProjectGuid>75B41AEA-4F05-413C-B383-A128E8672B05</ProjectGuid>
     <OutputType>Exe</OutputType>
     <RootNamespace>DbaScraper</RootNamespace>
     <AssemblyName>DbaScraper</AssemblyName>
@@ -13,6 +13,7 @@
     <Name>DbaScraper</Name>
     <SolutionDir Condition="$(SolutionDir) == '' Or $(SolutionDir) == '*Undefined*'">..\</SolutionDir>
     <RestorePackages>true</RestorePackages>
+    <ProductVersion>12.0.0</ProductVersion>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <DebugSymbols>true</DebugSymbols>
@@ -40,60 +41,40 @@
   <ItemGroup>
     <Reference Include="EasyNetQ">
       <HintPath>..\packages\EasyNetQ.0.35.1.288\lib\net40\EasyNetQ.dll</HintPath>
-      <Private>True</Private>
-    </Reference>
-    <Reference Include="etcetera">
-      <HintPath>..\packages\etcetera.0.5.0\lib\net40\etcetera.dll</HintPath>
-      <Private>True</Private>
     </Reference>
     <Reference Include="FSharp.Data">
       <HintPath>..\packages\FSharp.Data.2.0.8\lib\net40\FSharp.Data.dll</HintPath>
-      <Private>True</Private>
-    </Reference>
-    <Reference Include="HtmlAgilityPack">
-      <HintPath>..\packages\HtmlAgilityPack.1.4.6\lib\Net45\HtmlAgilityPack.dll</HintPath>
-      <Private>True</Private>
     </Reference>
     <Reference Include="mscorlib" />
-    <Reference Include="FSharp.Core, Version=4.3.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a">
-      <Private>True</Private>
-    </Reference>
+    <Reference Include="FSharp.Core, Version=4.3.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a" />
     <Reference Include="protobuf-net">
       <HintPath>..\packages\protobuf-net.2.0.0.480\lib\net40\protobuf-net.dll</HintPath>
-      <Private>True</Private>
     </Reference>
     <Reference Include="RabbitMQ.Client">
       <HintPath>..\packages\RabbitMQ.Client.3.3.2\lib\net30\RabbitMQ.Client.dll</HintPath>
-      <Private>True</Private>
     </Reference>
     <Reference Include="RestSharp">
       <HintPath>..\packages\RestSharp.104.4.0\lib\net4\RestSharp.dll</HintPath>
-      <Private>True</Private>
     </Reference>
     <Reference Include="Riemann">
       <HintPath>..\packages\riemann-csharp.1.0.0\lib\net40\Riemann.dll</HintPath>
-      <Private>True</Private>
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
     <Reference Include="System.Net" />
     <Reference Include="System.Numerics" />
     <Reference Include="System.ServiceProcess" />
-    <Reference Include="System.Xml" />
     <Reference Include="System.Xml.Linq" />
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config" />
-    <Compile Include="AgilityWrapper.fs" />
-    <Compile Include="Scrape.fs" />
-    <Compile Include="Program.fs" />
     <None Include="packages.config" />
+    <Compile Include="Program.fs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\ScraperCommon\ScraperCommon.fsproj">
       <Name>ScraperCommon</Name>
-      <Project>{c7057d27-5201-4969-b593-33632d54e37e}</Project>
-      <Private>True</Private>
+      <Project>C7057D27-5201-4969-B593-33632D54E37E</Project>
     </ProjectReference>
   </ItemGroup>
   <PropertyGroup>

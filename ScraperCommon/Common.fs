@@ -26,6 +26,8 @@ module Settings =
 module ScraperTypes = 
     open System
     
+    type ScrapeRequest = { term : string }
+
     type SearchTerm = 
         | SearchTerm of string
     

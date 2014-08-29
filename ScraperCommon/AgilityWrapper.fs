@@ -1,4 +1,6 @@
-﻿module AgilityWrapper
+﻿// taken from http://functionalflow.co.uk/blog/2013/10/14/fsharp-for-screen-scraping/
+
+module AgilityWrapper
 
 open HtmlAgilityPack
 
