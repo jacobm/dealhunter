@@ -47,6 +47,21 @@ module JsonFeedConversion =
         override self.CanConvert(objectType : Type) = objectType = typedefof<DbaId>
         override self.CanRead = false
 
+    type UriOptionConverter() =
+        inherit JsonConverter()
+
+        override self.WriteJson((writer : JsonWriter), (value : obj), (serializer : JsonSerializer)) : unit =
+            let item = value :?> Uri option
+            match item with
+            | None -> writer.WriteValue("null");
+            | Some url -> writer.WriteValue(url.ToString())
+            ()
+
+        override self.ReadJson((reader : JsonReader), (objectType : Type), (existingValue : obj),
+                               (serializer : JsonSerializer)) : obj = raise (Exception("Cannot read"))
+        override self.CanConvert(objectType : Type) = objectType.IsGenericType && objectType.GetGenericTypeDefinition() = typedefof<option<Uri>>
+        override self.CanRead = false
+
 module WebFeed = 
     open System
     open System.Threading
@@ -61,10 +76,12 @@ module WebFeed =
     open ScraperCommon.Settings
     open EasyNetQ
     open ScraperCommon.ScraperTypes
+    open FSharp.Data
+    open Scrape
 
     let (?) (parameters : obj) param = (parameters :?> Nancy.DynamicDictionary).[param]
     let serialize item = 
-        JsonConvert.SerializeObject(item, Formatting.Indented, new FeedConverter(), new DbaIdConverter())
+        JsonConvert.SerializeObject(item, Formatting.Indented, new FeedConverter(), new DbaIdConverter(), new UriOptionConverter())
     
     let notFoundResponse() = 
         let resp = new Response()
