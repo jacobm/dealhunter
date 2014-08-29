@@ -59,6 +59,8 @@ module WebFeed =
     open Newtonsoft.Json
     open JsonFeedConversion
     open ScraperCommon.Settings
+    open EasyNetQ
+    open ScraperCommon.ScraperTypes
 
     let (?) (parameters : obj) param = (parameters :?> Nancy.DynamicDictionary).[param]
     let serialize item = 
@@ -87,12 +89,22 @@ module WebFeed =
         resp.Contents <- fun s -> s.Write(data, 0, data.Length)
         resp
     
-    type HelloModule() as self = 
+    type FeedModule() as self = 
         inherit NancyModule()
         
-        let connectionString = "User ID=Scraper;Password=dingo;Host=localhost;Port=5432;Database=Scraper;Pooling=true;"
+        let postgreHost = getEnvValue "SCRAPERDB_PORT_5432_TCP_ADDR" "localhost"
+        let connectionString = getEnvValue "postgre" "User ID=Scraper;Password=dingo;Host=" + postgreHost + ";Port=5432;Database=Scraper;"
+        let rabbitHost = getEnvValue "RABBIT_PORT_5672_TCP_ADDR" "localhost"
+        let rabbitConnectionString = "amqp://guest:guest@" + rabbitHost
+        let bus = RabbitHutch.CreateBus(rabbitConnectionString)
+
 
         do 
+            self.Post.["/{searchTerm}"] <- fun parameters ->
+                let searchTerm = (parameters?searchTerm).ToString()
+                bus.Publish<ScrapeRequest>({term = searchTerm })
+                HttpStatusCode.OK :> obj
+
             self.Get.["/{searchTerm}"] <- fun parameters -> 
                 let searchTerm = (parameters?searchTerm).ToString()
                 let feedBaseUrl = (sprintf "%s/%s" self.Request.Url.SiteBase searchTerm)
