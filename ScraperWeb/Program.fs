@@ -122,6 +122,13 @@ module WebFeed =
                 bus.Publish<ScrapeRequest>({term = searchTerm })
                 HttpStatusCode.OK :> obj
 
+            self.Get.["search/{searchTerm}"] <- fun parameters -> 
+                let searchTerm = (parameters?searchTerm).ToString()
+                let url = new Uri("http://www.dba.dk/soeg?soeg=" + searchTerm + "&fra=privat")
+                let firstPage = Http.RequestString(url.ToString())
+                let listings = getListings (url, Page firstPage)
+                (okResponse listings) :> obj
+
             self.Get.["/{searchTerm}"] <- fun parameters -> 
                 let searchTerm = (parameters?searchTerm).ToString()
                 let feedBaseUrl = (sprintf "%s/%s" self.Request.Url.SiteBase searchTerm)
