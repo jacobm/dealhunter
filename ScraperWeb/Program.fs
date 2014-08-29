@@ -181,36 +181,14 @@ module WebFeed =
     let buildDb connectionString = 
         dropTables connectionString |> ignore
         let create = createTables connectionString
-        
-        let result = 
-            saveListing "" (SearchTerm "stokke") 
-                            { text = "testing like a boss"
-                              dbaId = (DbaId "12gf")
-                              thumbnail = Some(new Uri("http://localhost/image"))
-                              price = 200
-                              dbaLink = new Uri("http://localhost/link")
-                              location = 
-                                { postcode = 2300
-                                  city = "Amager" }
-                              postedAt = DateTime.Now }
-        
-        let res = find connectionString (SearchTerm "stokke")
-        let fisk = findListing connectionString (Guid.Parse("6426fe91-0964-4d22-831c-abcf8551a811"))
         ()
+        
 
     [<EntryPoint>]
     let main args = 
-        let connectionString = "User ID=Scraper;Password=dingo;Host=localhost;Port=5432;Database=Scraper;Pooling=true;"
-        let item = findFeedStart connectionString (SearchTerm "stokke")
-        let feed2 = findFeedStart connectionString (SearchTerm "notfound")
-        let id = Guid.Parse("5231ab0c-b231-472f-9412-806a57da74df")
-        let oldestItem = findFeedItem connectionString (SearchTerm "stokke") id
-        let id = Guid.Parse("e14dfbbf-354d-4183-981d-a0c6db8e12c4")
-        let bodyItem = findFeedItem connectionString (SearchTerm "stokke") id
-        let id = Guid.Parse("21f06d23-cd46-4240-9445-c62f5fd4a93d")
-        let tipItem = findFeedItem connectionString (SearchTerm "stokke") id
-        let latest = findLatest connectionString (SearchTerm "stokke")
-        let nancyHost = new NancyHost(new Uri("http://localhost:8888/"), new Uri("http://127.0.0.1:8888/"))
+        StaticConfiguration.DisableErrorTraces <- false
+        //let nancyHost = new NancyHost(new Uri("http://localhost:8889/"), new Uri("http://127.0.0.1:8889/"))
+        let nancyHost = new NancyHost(new Uri("http://localhost:8888/"))
         nancyHost.Start()
         printfn "ready..."
 
@@ -218,6 +196,6 @@ module WebFeed =
             Thread.Sleep(Timeout.Infinite);
         else
             Console.ReadKey() |> ignore
-        
+        Thread.Sleep(Timeout.Infinite);
         nancyHost.Stop()
         0
