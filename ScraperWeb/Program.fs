@@ -189,7 +189,7 @@ module WebFeed =
                                      link "next" n |]
                               _embedded = item.listing }
                             |> okResponse
-                response :> obj
+                okResponse response :> obj
         
         member self.GetLink feedBaseUrl (name : string) (id : Guid) : HalLink = 
             { linkName = name
