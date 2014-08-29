@@ -23,6 +23,11 @@ module Settings =
            then ConfigurationManager.ConnectionStrings.[key].ConnectionString
            else raise (ArgumentException("key " + key + " was not found"))
 
+    let getEnvValue name defaultValue =
+        match Environment.GetEnvironmentVariable(name) with
+        | null -> defaultValue
+        | some -> some
+
 module ScraperTypes = 
     open System
     
