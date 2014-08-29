@@ -58,9 +58,6 @@
     <Compile Include="Program.fs" />
     <None Include="App.config" />
     <None Include="packages.config" />
-    <None Include="Content\Public\index.html">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </None>
   </ItemGroup>
   <PropertyGroup>
     <MinimumVisualStudioVersion Condition="'$(MinimumVisualStudioVersion)' == ''">11</MinimumVisualStudioVersion>
