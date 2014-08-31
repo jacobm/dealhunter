@@ -1,7 +1,8 @@
 import "package:react/react.dart" as react;
 import "package:react/react_client.dart";
 import "dart:html";
-import "components/seach_text_input.react.dart";
+import "components/application.react.dart";
+import "components/search.react.dart";
 import "components/feed_watches.react.dart";
 import "stores/feed_store.dart";
 import "stores/user_store.dart";
@@ -96,10 +97,8 @@ void main() {
   var userStore = new UserStore();
 
   var f = new FeedStore();
-  f.Poke("dingo");
-  f.Poke("OMGZ");
-  f.Attach(pp);
+
 
   setClientConfiguration();
-  react.renderComponent(list({}), querySelector('#content'));
+  react.renderComponent(application({}), querySelector('#content'));
 }
