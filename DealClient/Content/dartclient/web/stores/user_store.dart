@@ -26,7 +26,7 @@ class UserStore {
   }
 
   UserStore._internal(){
-    new AppDispatcher().Attach(_onAction);
+    new AppDispatcher().attach(_onAction);
   }
 
 

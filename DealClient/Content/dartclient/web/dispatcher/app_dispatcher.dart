@@ -12,11 +12,11 @@ class AppDispatcher {
 
   AppDispatcher._internal();
 
-  void Attach(listener) {
+  void attach(listener) {
     actionStream.stream.listen(listener);
   }
 
-  void Dispatch(payload){
+  void handleAction(payload){
     print("Dispatching " + payload["actionType"]);
     actionStream.add(payload);
   }

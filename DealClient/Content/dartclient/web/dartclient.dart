@@ -76,7 +76,7 @@ var userDisplay = react.registerComponent(() => new _UserDisplay());
 class _DebugButton extends react.Component {
 
   _onClick(event){
-    new AppDispatcher().Dispatch(
+    new AppDispatcher().handleAction(
         {"actionType": AppConstants.LoginUser,
          "payload": "dingo"}
         );
