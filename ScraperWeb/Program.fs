@@ -36,7 +36,7 @@ module JsonFeedConversion =
     type DbaIdConverter() = 
         inherit JsonConverter()
         
-        override self.WriteJson((writer : JsonWriter), (value : obj), (serializer : JsonSerializer)) : unit = 
+        override self.WriteJson((writer : JsonWriter), (value : obj), (serializer : JsonSerializer)) : unit =
             let item = value :?> DbaId
             let (DbaId id) = item
             writer.WriteValue(id)
