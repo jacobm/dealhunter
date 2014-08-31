@@ -78,6 +78,7 @@ module WebFeed =
     open ScraperCommon.ScraperTypes
     open FSharp.Data
     open Scrape
+    open Nancy.TinyIoc
 
     let (?) (parameters : obj) param = (parameters :?> Nancy.DynamicDictionary).[param]
     let serialize item = 
@@ -114,7 +115,6 @@ module WebFeed =
         let rabbitHost = getEnvValue "RABBIT_PORT_5672_TCP_ADDR" "localhost"
         let rabbitConnectionString = "amqp://guest:guest@" + rabbitHost
         let bus = RabbitHutch.CreateBus(rabbitConnectionString)
-
 
         do 
             self.Post.["/{searchTerm}"] <- fun parameters ->
@@ -207,6 +207,14 @@ module WebFeed =
         let create = createTables connectionString
         ()
         
+    type ScraperWebBootstrapper() = 
+            inherit DefaultNancyBootstrapper()
+
+            override self.RequestStartup(container : TinyIoCContainer, pipelines : Nancy.Bootstrapper.IPipelines, context : NancyContext) =
+                pipelines.AfterRequest.AddItemToEndOfPipeline(fun (ctx : NancyContext) ->
+                    ctx.Response.WithHeaders(("Access-Control-Allow-Origin", "*"),
+                                             ("Access-Control-Allow-Methods", "POST,GET"),
+                                             ("Access-Control-Allow-Headers", "Accept, Origin, Content-type")) |> ignore)
 
     [<EntryPoint>]
     let main args = 
