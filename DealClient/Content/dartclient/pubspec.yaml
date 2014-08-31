@@ -3,3 +3,4 @@ description: A sample web application
 dependencies:
   browser: any
   react: ">=0.4.5 <0.5.0"
+  json_object: any
