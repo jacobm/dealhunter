@@ -4,7 +4,7 @@ import "dart:async";
 
 class AppDispatcher {
   static final AppDispatcher _singleton = new AppDispatcher._internal();
-  var actionStream = new StreamController();
+  var actionStream = new StreamController.broadcast();
 
   factory AppDispatcher() {
     return _singleton;
