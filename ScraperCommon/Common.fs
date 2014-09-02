@@ -3,7 +3,6 @@
 module Settings =
     open System
     open System.Configuration
-    open System.ComponentModel
 
     let exists (key : string) : bool =
         ConfigurationManager.AppSettings.[key] <> null
@@ -27,6 +26,13 @@ module Settings =
         match Environment.GetEnvironmentVariable(name) with
         | null -> defaultValue
         | some -> some
+
+    let getEnvironmentValue name =
+        let value = Environment.GetEnvironmentVariable(name)
+        if value = null then
+            raise (Exception("environment variable not found: " + name))
+        else
+            value
 
 module ScraperTypes = 
     open System
