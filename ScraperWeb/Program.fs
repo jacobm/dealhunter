@@ -62,6 +62,28 @@ module JsonFeedConversion =
         override self.CanConvert(objectType : Type) = objectType.IsGenericType && objectType.GetGenericTypeDefinition() = typedefof<option<Uri>>
         override self.CanRead = false
 
+module ScraperWebSettings = 
+    open System
+    open ScraperCommon.Settings
+    
+    let rabbitConnectionString (environment :string) = 
+        let rabbitUser = get "rabbit.user"
+        let rabbitPassword = get "rabbit.password"
+        match environment.ToLowerInvariant() with
+        | "development" -> String.Format("amqp://{0}:{1}@localhost", rabbitUser, rabbitPassword)
+        | "production" -> let host = getEnvironmentValue "RABBIT_PORT_5672_TCP_ADDR"
+                          String.Format("amqp://{0}:{1}@{2}", rabbitUser, rabbitPassword, host)
+        | _ -> raise (Exception("Unknown environment: " + environment))
+
+    let postgreConnectionString (environment : string) =
+        let user = get "postgre.user"
+        let password = get "postgre.password"
+        match environment.ToLowerInvariant() with
+        | "development" -> String.Format("User ID={0};Password={1};Host=localhost;Port=5432;Database=Scraper;", user, password)
+        | "production" -> let host = getEnvironmentValue "SCRAPERDB_PORT_5432_TCP_ADDR"
+                          String.Format("User ID={0};Password={1};Host={2};Port=5432;Database=Scraper;", user, password, host)
+        | _ -> raise (Exception("Unknown environment: " + environment))
+
 module WebFeed = 
     open System
     open System.Threading
@@ -69,7 +91,6 @@ module WebFeed =
     open Nancy
     open Nancy.Hosting.Self
     open ScraperCommon.Persistence
-    open ScraperCommon.ScraperTypes
     open ScraperCommon.WebTypes
     open Newtonsoft.Json
     open JsonFeedConversion
@@ -79,6 +100,7 @@ module WebFeed =
     open FSharp.Data
     open Scrape
     open Nancy.TinyIoc
+    open ScraperWebSettings
 
     let (?) (parameters : obj) param = (parameters :?> Nancy.DynamicDictionary).[param]
     let serialize item = 
@@ -110,10 +132,9 @@ module WebFeed =
     type FeedModule() as self = 
         inherit NancyModule()
         
-        let postgreHost = getEnvValue "SCRAPERDB_PORT_5432_TCP_ADDR" "localhost"
-        let connectionString = getEnvValue "postgre" "User ID=Scraper;Password=dingo;Host=" + postgreHost + ";Port=5432;Database=Scraper;"
-        let rabbitHost = getEnvValue "RABBIT_PORT_5672_TCP_ADDR" "localhost"
-        let rabbitConnectionString = "amqp://guest:guest@" + rabbitHost
+        let environment = get "environment"
+        let rabbitConnectionString = rabbitConnectionString environment
+        let connectionString = postgreConnectionString environment
         let bus = RabbitHutch.CreateBus(rabbitConnectionString)
 
         do 
@@ -220,7 +241,8 @@ module WebFeed =
     let main args = 
         StaticConfiguration.DisableErrorTraces <- false
         //let nancyHost = new NancyHost(new Uri("http://localhost:8889/"), new Uri("http://127.0.0.1:8889/"))
-        let nancyHost = new NancyHost(new Uri("http://localhost:8888/"))
+        let port = get "port"
+        let nancyHost = new NancyHost(new Uri(String.Format("http://localhost:{0}/", port)))
         nancyHost.Start()
         printfn "ready..."
 
