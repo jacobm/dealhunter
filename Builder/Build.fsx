@@ -12,19 +12,6 @@ let scraperWebName = "ScraperWeb"
 let scraperRobotName = "DbaScraper"
 let dealClientName = "DealClient"
 
-
-
-let compileDart2js path outputDir =
-    let info = new ProcessStartInfo("dart2js", "") 
-    let set (info : ProcessStartInfo) : unit = info.FileName <- "dart2js"
-                                               info.Arguments <- "" 
-                                               ()
-    let result = ProcessHelper.ExecProcessAndReturnMessages set (TimeSpan.FromMinutes((float)1.0f))
-    match result.OK with
-    | true -> trace(String.Join("\n", result.Messages))
-    | false -> trace(String.Join("\n", result.Errors))
-    ()
-
 let buildDockerImage path tagname = 
     let args = "build -t " + tagname + " " + path
     trace ("docker " + args)
