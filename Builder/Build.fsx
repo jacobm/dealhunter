@@ -46,8 +46,10 @@ let execute cmd args =
         info.FileName <- cmd
         info.Arguments <- args
     let result = ProcessHelper.ExecProcessAndReturnMessages exeInfo workTime
-    if not result.OK then raise (Exception (cmd + " " + args + ": " + (String.Join("\n", result.Errors))))
-    else trace(String.Join("\n", result.Messages))
+    if result.OK then trace(String.Join("\n", result.Messages))
+    else trace (cmd + " " + args + ": " + (String.Join("\n", result.Errors)))
+         trace (cmd + " " + args + ": " + (String.Join("\n", result.Messages)))
+         raise (Exception ("process exit"))
 
 // Targets
 Target "Clean" (fun _ ->
