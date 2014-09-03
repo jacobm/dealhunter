@@ -20,17 +20,16 @@ module Site  =
 
             let writeFileToStream stream filename =
                 if filename = "/" then
-                    use fileStream = File.OpenRead("../../Content/dartclient/web/dartclient.html")
+                    use fileStream = File.OpenRead("../../Content/web/dartclient.html")
                     fileStream.CopyTo(stream)
                 else
-                    let file = "../../Content/dartclient/web/" + filename
+                    let file = "../../Content/web/" + filename
                     if File.Exists file then
                         use fileStream = File.OpenRead(file)
                         fileStream.CopyTo(stream)
                     else
                         ()
 
-            
             override self.ApplicationStartup(container : TinyIoCContainer, pipelines : Nancy.Bootstrapper.IPipelines) =
                 self.Conventions.StaticContentsConventions.Insert(0, fun context name ->
                     match context.Request.Method, not (context.Request.Path.ToLowerInvariant().StartsWith("/api")) with
