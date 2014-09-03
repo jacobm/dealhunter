@@ -2,10 +2,9 @@ library FeedStore;
 
 import 'dart:async';
 import 'dart:html';
-import 'dart:convert';
-import "package:json_object/json_object.dart";
 import '../constants/app_constants.dart' as AppConstants;
 import '../dispatcher/app_dispatcher.dart';
+import "dart:convert";
 
 class FeedStore {
   static const SearchResultReady = "SeachResultReady";
@@ -31,7 +30,7 @@ class FeedStore {
   _search(String term){
     HttpRequest.getString("http://localhost:8888/search/" + term)
                .then((response) {
-      var items = new JsonObject.fromJsonString(response);
+      var items = JSON.decode(response);
       _searchItems = items.map((x) => new SearchItem.fromMap(x)).toList();
       events.add(SearchResultReady);
     }).catchError((error){
