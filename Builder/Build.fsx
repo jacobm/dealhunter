@@ -53,7 +53,9 @@ let execute cmd args =
 
 // Targets
 Target "Clean" (fun _ ->
-    CleanDir buildDir
+    //CleanDir buildDir <<= follows symbolic links and delete contents,
+    // does not play well with darts packages links...
+    execute "rm" "-rf ./build"
 )
 
 // DbaScraper robot
