@@ -52,6 +52,15 @@ let compileFSharpProject (name :string) =
       |> MSBuildRelease (buildDir + name + "/bin") "Build"
       |> Log "AppBuild-Output: "
 
+let execute cmd args = 
+    let workTime = (TimeSpan.FromMinutes((float)1.0f))
+    let exeInfo (info : ProcessStartInfo) : unit = 
+        info.FileName <- cmd
+        info.Arguments <- args
+    let result = ProcessHelper.ExecProcessAndReturnMessages exeInfo workTime
+    if not result.OK then raise (Exception (cmd + " " + args + ": " + (String.Join("\n", result.Errors))))
+    else trace(String.Join("\n", result.Messages))
+
 // Targets
 Target "Clean" (fun _ ->
     CleanDir buildDir
