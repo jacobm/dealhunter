@@ -23,3 +23,10 @@ pom.xml.asc
 DbaScraper.userprefs
 packages
 build
+DbaScraper/DesignTimeURIs
+DbaScraper/FreebaseSchema
+DbaScraper/WorldBankSchema
+ScraperWeb/DesignTimeURIs
+ScraperWeb/FreebaseSchema
+ScraperWeb/WorldBankSchema
+
