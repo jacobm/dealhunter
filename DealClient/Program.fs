@@ -39,8 +39,6 @@ module Site  =
                             response.Contents <- Action<IO.Stream> (fun stream -> writeFileToStream stream context.Request.Path)
                             response
                     | _ -> null)
-                self.Conventions.ViewLocationConventions.Insert(0, fun viewName model context ->
-                    String.Concat("../../views/DealClient/", viewName))
 
     [<EntryPoint>]
     let main args = 
