@@ -1,5 +1,5 @@
 ﻿
-#r @"../packages/FAKE.3.3.0/tools/FakeLib.dll"
+#r @"../packages/FAKE/tools/FakeLib.dll"
 
 open System
 open System.IO
