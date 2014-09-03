@@ -106,13 +106,16 @@ Target "DealClient.Compile" (fun _ ->
 
 Target "DealClient.Dart" (fun _ -> 
     let cwd = Directory.GetCurrentDirectory()
-    let clientDir = ("./build/" + dealClientName + "/bin/dealclient")
+    let clientDir = ("./build/" + dealClientName + "/bin/Content")
     try
-        FileHelper.CopyDir clientDir  "./DealClient/dartclient/web" (fun _ -> true)        
+        FileHelper.CopyDir clientDir  "./DealClient/Content" (fun _ -> true)
+
         Directory.SetCurrentDirectory(clientDir)
- 
         execute "pub" "get"
-        execute "dart" "--minify --package-root=packages dartclient.dart"         
+        Directory.SetCurrentDirectory(cwd)
+
+        Directory.SetCurrentDirectory(clientDir + "/web")
+        execute "dart2js" "--minify --package-root=packages --out=dartclient.js dartclient.dart"
     finally
         Directory.SetCurrentDirectory(cwd)
     ()
