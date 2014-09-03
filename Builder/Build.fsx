@@ -6,6 +6,7 @@ open System.IO
 open System.Diagnostics
 open Fake
 open Fake.ConfigurationHelper
+open Fake.FileHelper
 
 let buildDir = "./build/"
 let scraperWebName = "ScraperWeb"
@@ -99,32 +100,23 @@ Target "DealClient.Compile" (fun _ ->
     compileFSharpProject "DealClient"
 )
 
-Target "DealClient.Dart.PubGet" (fun _ -> 
+Target "DealClient.Dart" (fun _ -> 
     let cwd = Directory.GetCurrentDirectory()
+    let clientDir = ("./build/" + dealClientName + "/bin/dealclient")
     try
-        Directory.SetCurrentDirectory("./DealClient/Content/dartclient")
-        let set (info : ProcessStartInfo) : unit = info.FileName <- "pub"
-                                                   info.Arguments <- "get" 
-                                                   ()
-        let result = ProcessHelper.ExecProcessAndReturnMessages set (TimeSpan.FromMinutes((float)1.0f))
-        match result.OK with
-        | true -> trace(String.Join("\n", result.Messages))
-        | false -> trace(String.Join("\n", result.Errors))
-                   raise (Exception "dart pub get failed")
+        FileHelper.CopyDir clientDir  "./DealClient/dartclient/web" (fun _ -> true)        
+        Directory.SetCurrentDirectory(clientDir)
+ 
+        execute "pub" "get"
+        execute "dart" "--minify --package-root=packages dartclient.dart"         
     finally
         Directory.SetCurrentDirectory(cwd)
     ()
 )
 
-Target "DealClient.Dart.Compile" (fun _ -> 
-    compileDart2js "" ""
-)
-
 Target "DealClient" (fun _ ->
     trace "Done"
 )
-
-
 
 Target "Default" (fun _ -> 
     trace "Done")
@@ -143,7 +135,7 @@ Target "Default" (fun _ ->
 "Clean"
     ==> "DealClient.Dart.CheckInstallation"
     ==> "DealClient.Compile"
-    ==> "DealClient.Dart.PubGet"
+    ==> "DealClient.Dart"
     ==> "DealClient"
 
 "Clean" 
