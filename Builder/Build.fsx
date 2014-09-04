@@ -121,6 +121,10 @@ Target "DealClient.Dart" (fun _ ->
     ()
 )
 
+Target "DealClient.BuildDockerImage" (fun _ ->
+    buildDocker dealClientName "jacobm/deal-client"
+)
+
 Target "DealClient" (fun _ ->
     trace "Done"
 )
@@ -143,6 +147,7 @@ Target "Default" (fun _ ->
     ==> "DealClient.Dart.CheckInstallation"
     ==> "DealClient.Compile"
     ==> "DealClient.Dart"
+    ==> "DealClient.BuildDockerImage"
     ==> "DealClient"
 
 "Clean" 
