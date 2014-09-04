@@ -1,0 +1,10 @@
+FROM      ubuntu:trusty
+MAINTAINER Jacob Mortensen <jacob.mortensen.it@gmail.com>
+
+RUN apt-get update
+RUN apt-get install -y mono-complete
+RUN apt-get install -y fsharp
+
+ADD ./bin ./site
+
+CMD mono "./site/DealClient.exe"

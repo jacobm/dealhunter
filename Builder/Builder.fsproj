@@ -40,6 +40,7 @@
     <None Include="Build.fsx" />
     <None Include="DbaScraper_Dockerfile" />
     <None Include="ScraperWeb_Dockerfile" />
+    <None Include="DealClent_Dockerfile" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="mscorlib" />
