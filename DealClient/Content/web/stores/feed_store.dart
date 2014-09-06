@@ -75,7 +75,8 @@ class SearchItem {
     item.dbaId = map["dbaId"];
     String dingo = map["postedAt"];
     item.postedAt = DateTime.parse(dingo);
-    item.location = new Location(map["postcode"], map["city"]);
+    item.location = new Location(map["location"]["postcode"],
+                                 map["location"]["city"]);
 
     return item;
   }
