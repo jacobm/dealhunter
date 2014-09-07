@@ -1,6 +1,7 @@
 ﻿
 module Site  =
     open System
+    open System.Text
     open System.Threading
     open System.IO
     open Nancy
@@ -15,7 +16,7 @@ module Site  =
                 //self.View.["index.html"] :> obj
                 self.Response.AsFile("Content/index.html", "text/html") :> obj
 
-        type DartClientBootstrapper() as self = 
+        type DartClientBootstrapper() =
             inherit DefaultNancyBootstrapper()
 
             let writeFileToStream stream filename =
@@ -24,18 +25,23 @@ module Site  =
                     fileStream.CopyTo(stream)
                 else
                     let file = "../../Content/web/" + filename
-                    if File.Exists file then
-                        use fileStream = File.OpenRead(file)
-                        fileStream.CopyTo(stream)
-                    else
-                        ()
+                    use fileStream = File.OpenRead(file)
+                    fileStream.CopyTo(stream)
 
             override self.ApplicationStartup(container : TinyIoCContainer, pipelines : Nancy.Bootstrapper.IPipelines) =
                 self.Conventions.StaticContentsConventions.Insert(0, fun context name ->
                     match context.Request.Method, not (context.Request.Path.ToLowerInvariant().StartsWith("/api")) with
                     | "GET", true -> 
                             let response = new Response()
-                            response.Contents <- Action<IO.Stream> (fun stream -> writeFileToStream stream context.Request.Path)
+                            if context.Request.Path = "/"
+                            then
+                               response.Contents <- Action<IO.Stream> (fun stream -> writeFileToStream stream context.Request.Path)
+                            else if (File.Exists  ("../../Content/web/" + context.Request.Path)) then
+                               response.Contents <- Action<IO.Stream> (fun stream -> writeFileToStream stream context.Request.Path)
+                            else
+                                let content = Encoding.UTF8.GetBytes("404 - Page not found");
+                                response.Contents <- Action<IO.Stream> (fun stream -> stream.Write(content, 0, content.Length))
+                                response.StatusCode <- HttpStatusCode.NotFound
                             response
                     | _ -> null)
 
