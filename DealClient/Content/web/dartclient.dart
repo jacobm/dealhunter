@@ -8,6 +8,8 @@ import "stores/feed_store.dart";
 import "stores/user_store.dart";
 import "dispatcher/app_dispatcher.dart";
 import "constants/app_constants.dart" as AppConstants;
+import "package:route/client.dart";
+import "package:route/url_pattern.dart";
 
 class _Item extends react.Component {
   componentWillReceiveProps(newProps) {
@@ -93,11 +95,23 @@ void pp(s) {
   print("Received " + s);
 }
 
+void showHome(String path) {
+  print("home");
+  // nothing to parse from path, since there are no groups
+}
+
+void showArticle(String path) {
+  print("dingo");
+  //var articleId = articleUrl.parse(path)[0];
+  // show article page with loading indicator
+  // load article from server, then render article
+}
+
+void matchPages(String Path) {
+  print("match");
+}
+
 void main() {
-  var userStore = new UserStore();
-
-  var f = new FeedStore();
-
 
   setClientConfiguration();
   react.renderComponent(application({}), querySelector('#content'));
