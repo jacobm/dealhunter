@@ -8,5 +8,13 @@ var dispatcher = new AppDispatcher();
 search(String text) {
   dispatcher.handleAction({
     "actionType": AppConstants.AppSearch,
-    "payload": {"searchTerm": text}});
+    "payload": {"searchTerm": text}
+  });
+}
+
+login(String token){
+  dispatcher.handleAction({
+    "actionType": AppConstants.LoginUser,
+    "payload": {"token": token}
+  });
 }
