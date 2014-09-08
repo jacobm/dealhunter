@@ -5,7 +5,7 @@ import "package:react/react.dart" as react;
 class _FeedWatches extends react.Component {
 
   render() {
-    return react.div({}, "FeedWatch");
+    return react.div({"className": this.props["className"]}, "FeedWatch");
   }
 }
 
