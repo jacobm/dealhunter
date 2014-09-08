@@ -57,7 +57,13 @@ class _SearchItem extends react.Component {
   SearchItem get item => this.props["item"];
 
   render() {
-    return react.li({}, item.text);
+    return react.li({}, [item.text,
+                         react.img({"src": item.thumbnail}),
+                         react.span({}, [item.location.city,
+                                         item.location.postcode,
+                                         item.postedAt.toString(),
+                                         item.price
+                                         ])]);
   }
 }
 var searchItem = react.registerComponent(() => new _SearchItem());
@@ -79,8 +85,9 @@ class _Search extends react.Component {
   }
 
   render() {
-    return react.div({}, [searchTextInput({"onSubmit": _onSubmit}),
-                          searchTable(_searchResults)]);
+    return react.div({"className" : this.props["className"]},
+        [searchTextInput({"onSubmit": _onSubmit}),
+         searchTable(_searchResults)]);
   }
 
   List<SearchItem> get _searchResults => this.state["searchResult"];
