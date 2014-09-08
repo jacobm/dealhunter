@@ -16,7 +16,7 @@ class CurrentUser {
 
 
 class UserStore {
-  static final UserLoggedInEvent = "UserLoggedInEvent";
+  static const UserLoggedInEvent = "UserLoggedInEvent";
   static final UserStore _singleton = new UserStore._internal();
   var _user = new CurrentUser("Jacob", "http://dingo.com/img/123");
   var events = new StreamController<String>();
