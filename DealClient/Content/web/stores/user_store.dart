@@ -6,6 +6,8 @@ import "package:google_plus_v1_api/plus_v1_api_browser.dart";
 import "package:google_plus_v1_api/plus_v1_api_client.dart";
 import '../constants/app_constants.dart' as AppConstants;
 import '../dispatcher/app_dispatcher.dart';
+import "package:google_plus_v1_api/plus_v1_api_browser.dart" as plusclient;
+
 
 class CurrentUser {
   String name;
@@ -22,9 +24,12 @@ class UserStore {
   static const UserLoggedInEvent = "UserLoggedInEvent";
   static const UserLoggedOutEvent = "UserLoggedOutEvent";
   static final UserStore _singleton = new UserStore._internal();
-  var _user = null;
+  CurrentUser _user = null;
   GoogleOAuth2 auth = null;
-  var events = new StreamController<String>();
+  StreamController<String> eventsCtrl = new StreamController<String>();
+  Stream<String> events = null;
+
+  CurrentUser get User => _user;
 
   factory UserStore() {
     return _singleton;
@@ -32,39 +37,51 @@ class UserStore {
 
   UserStore._internal(){
     new AppDispatcher().attach(_onAction);
+    events = eventsCtrl.stream.asBroadcastStream();
+    auth = new GoogleOAuth2(
+          AppConstants.googleClientId,
+          ["openid", "email", plusclient.Plus.PLUS_ME_SCOPE],
+          tokenLoaded: _tokenLoaded);
   }
 
 
   void Attach(listener){
-    events.stream.listen(listener);
+    events.listen(listener);
   }
-
-  CurrentUser get User => _user;
 
   void _onAction(action){
     var payload = action["payload"];
     switch(action["actionType"]){
       case AppConstants.LoginUser:
-        auth = payload["auth"];
-        _loginUser(auth).then((Person person){
-          _user = new CurrentUser(person.name.givenName, person.image.url);
-          events.add(UserLoggedInEvent);
-        });
+        _loginUser();
         break;
       case AppConstants.LogoutUser:
-        auth.logout();
-        _user = null;
-        events.add(UserLoggedOutEvent);
+        _logoutUser();
         break;
       default:
         break;
     }
   }
 
-  _loginUser(GoogleOAuth2 auth) {
-    var plus = new Plus(auth);
-    plus.key = AppConstants.googleClientId;
-    plus.oauth_token = auth.token.data;
-    return plus.people.get("me");
+  _logoutUser() {
+    auth.logout();
+    _user = null;
+    eventsCtrl.add(UserLoggedOutEvent);
+  }
+
+  _loginUser() {
+    auth.login(immediate: true, onlyLoadToken : true).then((Token token){
+      var plus = new Plus(auth);
+       plus.key = AppConstants.googleClientId;
+       plus.oauth_token = token.data;
+       return plus.people.get("me");
+    }).then((Person person){
+      _user = new CurrentUser(person.name.givenName, person.image.url);
+      eventsCtrl.add(UserLoggedInEvent);
+    });
+  }
+
+  _tokenLoaded(token){
+    _loginUser();
   }
 }
