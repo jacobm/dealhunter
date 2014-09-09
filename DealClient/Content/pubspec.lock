@@ -33,6 +33,10 @@ packages:
     description: google_oauth2_client
     source: hosted
     version: "0.4.0"
+  google_plus_v1_api:
+    description: google_plus_v1_api
+    source: hosted
+    version: "0.4.13"
   http:
     description: http
     source: hosted

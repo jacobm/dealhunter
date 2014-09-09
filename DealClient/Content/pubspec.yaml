@@ -4,4 +4,5 @@ dependencies:
   browser: any
   google_oauth2_client: '>=0.3.4'
   react: '>=0.4.5 <0.5.0'
+  google_plus_v1_api: any
   route: any
