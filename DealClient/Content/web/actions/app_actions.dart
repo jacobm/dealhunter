@@ -1,5 +1,6 @@
 library Actions;
 
+import "package:google_oauth2_client/google_oauth2_browser.dart";
 import "../dispatcher/app_dispatcher.dart";
 import "../constants/app_constants.dart" as AppConstants;
 
@@ -12,9 +13,16 @@ search(String text) {
   });
 }
 
-login(String token){
+login(GoogleOAuth2 auth){
   dispatcher.handleAction({
     "actionType": AppConstants.LoginUser,
-    "payload": {"token": token}
+    "payload": {"auth": auth}
+  });
+}
+
+logout(){
+  dispatcher.handleAction({
+    "actionType": AppConstants.LogoutUser,
+    "payload": {}
   });
 }
