@@ -40,8 +40,8 @@ class _Application extends react.Component {
   var homeComponent = react.div({},
       [react.div({"className": "row"},
                   [navBar({}),
-                   search({"className" : "debug-border col-sm-8"}),
-                   feedWatches({"className": "debug-border col-sm-4"})
+                   search({"className" : "col-sm-8"}),
+                   feedWatches({"className": "col-sm-4"})
                   ])
       ]);
   var searchComponent = react.div({}, "search");

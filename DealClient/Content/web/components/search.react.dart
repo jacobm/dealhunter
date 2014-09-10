@@ -90,7 +90,7 @@ class _Search extends react.Component {
   }
 
   render() {
-    return react.div({"className" : "debug-border " + this.props["className"]},
+    return react.div({"className" : this.props["className"]},
         [searchTextInput({"onSubmit": _onSubmit}),
          searchTable(_searchResults)]);
   }
