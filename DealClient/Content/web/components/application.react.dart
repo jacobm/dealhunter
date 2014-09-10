@@ -47,16 +47,13 @@ class _Application extends react.Component {
 
   _showHome(String path){
     this.setState({"Component": navbar});
-    print("home");
   }
 
   _showSearch(String path){
     this.setState({"Component": searchComponent});
-    print("search");
   }
 
   _showCatchAll(String path) {
-    print("catch all");
   }
 
   render() {
