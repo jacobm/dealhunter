@@ -167,7 +167,7 @@ let getListings (item : Uri * Html) =
             |> descendants "tr"
             |> Seq.filter 
                    (fun x -> 
-                   (hasClass "dbaListing listing       " x) || (hasClass "dbaListing listing     lastListing  " x))
+                   (hasClass "dbaListing listing" x) || (hasClass "dbaListing listing lastListing" x))
     
     let listings = Seq.map toListing result
     listings
