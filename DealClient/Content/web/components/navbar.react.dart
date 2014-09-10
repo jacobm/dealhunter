@@ -16,7 +16,10 @@ class _GoogleLoginButton extends react.Component {
 
   render (){
     return react.div({},
-      [react.button({"onClick": _onClick}, "Login")]
+      [react.a({"onClick": _onClick,
+                "className": "signIn btn btn-block btn-social btn-google-plus"},
+                [react.i({"className": "fa fa-google-plus"}),
+                 "Sign in with Google"])]
     );
   }
 }
@@ -32,8 +35,8 @@ class _CurrentUser extends react.Component {
     }
 
     return react.div({},
-      react.div({}, [User.name,
-                     react.button({"onClick": _onLogoutClick}, "Logout"),
+      react.div({}, [react.button({"onClick": _onLogoutClick,
+                                   "className": "signOut"}, "Logout"),
                      react.img({"src": User.imageUrl})])
     );
   }
