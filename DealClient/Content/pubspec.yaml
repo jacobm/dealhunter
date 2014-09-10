@@ -6,3 +6,4 @@ dependencies:
   react: '>=0.4.5 <0.5.0'
   google_plus_v1_api: any
   route: any
+  intl: any
