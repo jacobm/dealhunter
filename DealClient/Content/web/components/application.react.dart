@@ -37,16 +37,21 @@ class _Application extends react.Component {
     router.gotoPath("/#",  "Deal Home");
   }
 
-  var homeComponent = react.div({}, "home");
+  var homeComponent = react.div({},
+      [react.div({"className": "row"},
+                  [navBar({}),
+                   search({"className" : "debug-border col-sm-8"}),
+                   feedWatches({"className": "debug-border col-sm-4"})
+                  ])
+      ]);
   var searchComponent = react.div({}, "search");
-  var navbar = react.div({}, navBar({}));
 
   getInitialState(){
     return {"Component": homeComponent };
   }
 
   _showHome(String path){
-    this.setState({"Component": navbar});
+    this.setState({"Component": homeComponent});
   }
 
   _showSearch(String path){

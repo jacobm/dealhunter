@@ -14,4 +14,6 @@
   margin-right: 15;
 }
 
+.debug-border {
+    outline: 1px solid orange;
 }
