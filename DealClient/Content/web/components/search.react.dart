@@ -1,5 +1,6 @@
 library Search;
 
+import 'package:intl/intl.dart';
 import "package:react/react.dart" as react;
 import "../actions/app_actions.dart" as Actions;
 import "../stores/feed_store.dart";
@@ -62,13 +63,16 @@ class _SearchItem extends react.Component {
   SearchItem get item => this.props["item"];
 
   render() {
-    return react.li({}, [item.text,
-                         react.img({"src": item.thumbnail}),
-                         react.span({}, [item.location.city,
-                                         item.location.postcode,
-                                         item.postedAt.toString(),
-                                         item.price
-                                         ])]);
+    var formatter = new DateFormat('dd-MM-yyyy');
+    var date = formatter.format(item.postedAt);
+
+    return react.li({"className": "row"},
+        [react.img({"src": item.thumbnail, "className": "col-md-4"}),
+         react.span({"className": "col-md-1"}, item.price.toString() + " kr"),
+         react.span({"className": "col-md-1"}, date),
+         react.span({"className": "col-md-4"}, item.location.postcode.toString() + " - " + item.location.city),
+              react.span({"className": "col-md-6"},
+             [item.text])]);
   }
 }
 var searchItem = react.registerComponent(() => new _SearchItem());
@@ -82,6 +86,7 @@ class _Search extends react.Component {
 
   componentDidMount(domNode) {
     feedStore.Attach(_onChange);
+    _onSubmit("dingo");
   }
 
   searchTable(List<SearchItem> items) {
