@@ -1,4 +1,4 @@
-.signOut {
+.sign-out {
   display: inline-block;
   background: #dd4b39;
   color: white;
@@ -9,7 +9,9 @@
   margin-right: 10px;
 }
 
-.signIn {
+.sign-in {
   margin-top: 7px;
   margin-right: 15;
+}
+
 }
