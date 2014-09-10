@@ -38,6 +38,7 @@ module Site  =
                                response.Contents <- Action<IO.Stream> (fun stream -> writeFileToStream stream context.Request.Path)
                             else if (File.Exists  ("../../Content/web/" + context.Request.Path)) then
                                response.Contents <- Action<IO.Stream> (fun stream -> writeFileToStream stream context.Request.Path)
+                               if context.Request.Path.EndsWith("css") then response.ContentType <- "text/css"
                             else
                                 let content = Encoding.UTF8.GetBytes("404 - Page not found");
                                 response.Contents <- Action<IO.Stream> (fun stream -> stream.Write(content, 0, content.Length))
