@@ -59,13 +59,17 @@ class _NavBar extends react.Component {
   }
 
   render() {
+    var children = [];
+
     if (User == null){
-      return react.div({}, ["Navbar",
-                            googleLoginButton({})]);
+      children = [googleLoginButton({})];
     } else {
-      return react.div({}, ["Navbar",
-                            currentUser({"user": User})]);
+      children = [currentUser({"user": User})];
     }
+
+    return react.div({"className": "navbar navbar-default"},
+        [react.div({"className": "navbar-brand"}, "Deals"),
+         react.div({"className": "navbar-right"}, children)]);
   }
 
   _onUserEvent(event) {
