@@ -36,15 +36,20 @@ class _SearchTextInput extends react.Component {
   }
 
   render() {
-    return react.input(
-        {"onChange": (e) => _onChange(e),
-         "onSubmit": (e) => _onSubmit(),
-         "onKeyDown": (e) => _onKeyDown(e),
-         "value" : _value,
-         "placeholder": "Search"},
-         react.div({}, [_value,
-                        react.button({
-                         "onClick": (e) => _onSubmit()}, "Search")])
+    return
+        react.div({"className": "row center-block"}, [
+        react.div({"className": "col-sm-6 col-md-6"},
+              react.input(
+              {"onChange": (e) => _onChange(e),
+               "onSubmit": (e) => _onSubmit(),
+               "onKeyDown": (e) => _onKeyDown(e),
+               "value" : _value,
+               "placeholder": "Search",
+               "className": "form-control"})),
+        react.div({"className": "col-sm-3 col-md-3 input-group"},
+             [react.button({"onClick": (e) => _onSubmit(),
+                            "className": "btn btn-primary"},
+                 react.i({"className": "glyphicon glyphicon-search"}))])]
     );
   }
 
