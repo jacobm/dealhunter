@@ -7,6 +7,7 @@ import "package:google_plus_v1_api/plus_v1_api_client.dart";
 import '../constants/app_constants.dart' as AppConstants;
 import '../dispatcher/app_dispatcher.dart';
 import "package:google_plus_v1_api/plus_v1_api_browser.dart" as plusclient;
+import '../dispatcher/event_dispatcher.dart';
 
 
 class CurrentUser {
@@ -26,8 +27,7 @@ class UserStore {
   static final UserStore _singleton = new UserStore._internal();
   CurrentUser _user = null;
   GoogleOAuth2 auth = null;
-  StreamController<String> eventsCtrl = new StreamController<String>();
-  Stream<String> events = null;
+  EventDispatcher eventDispatcher = new EventDispatcher();
 
   CurrentUser get User => _user;
 
@@ -37,16 +37,14 @@ class UserStore {
 
   UserStore._internal(){
     new AppDispatcher().attach(_onAction);
-    events = eventsCtrl.stream.asBroadcastStream();
+    eventDispatcher.attach(_onEvent);
     auth = new GoogleOAuth2(
           AppConstants.googleClientId,
           ["openid", "email", plusclient.Plus.PLUS_ME_SCOPE],
           tokenLoaded: _tokenLoaded);
   }
 
-
-  void Attach(listener){
-    events.listen(listener);
+  void _onEvent(String event){
   }
 
   void _onAction(action){
@@ -66,7 +64,7 @@ class UserStore {
   _logoutUser() {
     auth.logout();
     _user = null;
-    eventsCtrl.add(UserLoggedOutEvent);
+    eventDispatcher.handleEvent(UserLoggedOutEvent);
   }
 
   _loginUser() {
@@ -77,7 +75,7 @@ class UserStore {
        return plus.people.get("me");
     }).then((Person person){
       _user = new CurrentUser(person.name.givenName, person.image.url);
-      eventsCtrl.add(UserLoggedInEvent);
+      eventDispatcher.handleEvent(UserLoggedInEvent);
     });
   }
 

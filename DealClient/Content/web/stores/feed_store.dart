@@ -4,14 +4,15 @@ import 'dart:async';
 import 'dart:html';
 import '../constants/app_constants.dart' as AppConstants;
 import '../dispatcher/app_dispatcher.dart';
+import '../dispatcher/event_dispatcher.dart';
 import "dart:convert";
 
 class FeedStore {
   static const SearchResultReady = "SeachResultReady";
   List<SearchItem> _searchItems = new List<SearchItem>();
+  EventDispatcher eventDispatcher = new EventDispatcher();
 
   static final FeedStore _singleton = new FeedStore._internal();
-    var events = new StreamController<String>();
 
   factory FeedStore() {
     return _singleton;
@@ -19,27 +20,27 @@ class FeedStore {
 
   FeedStore._internal(){
     new AppDispatcher().attach(_onAction);
+    eventDispatcher.attach(_onEvent);
   }
 
   List<SearchItem> get items => _searchItems;
-
-  void Attach(listener){
-    events.stream.listen(listener);
-  }
 
   _search(String term){
     HttpRequest.getString("http://localhost:8888/search/" + term)
                .then((response) {
       var items = JSON.decode(response);
       _searchItems = items.map((x) => new SearchItem.fromMap(x)).toList();
-      events.add(SearchResultReady);
+      eventDispatcher.handleEvent(SearchResultReady);
     }).catchError((error){
       print(error);
     });
   }
 
+  void _onEvent(event) {
+    print(event);
+  }
+
   void _onAction(action){
-    print(action);
     switch(action["actionType"]){
       case AppConstants.AppSearch:
         _search(action["payload"]["searchTerm"]);
