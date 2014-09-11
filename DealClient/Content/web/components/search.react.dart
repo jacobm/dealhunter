@@ -4,6 +4,7 @@ import 'package:intl/intl.dart';
 import "package:react/react.dart" as react;
 import "../actions/app_actions.dart" as Actions;
 import "../stores/feed_store.dart";
+import '../dispatcher/event_dispatcher.dart';
 
 var ENTER_KEY_CODE = 13;
 
@@ -79,14 +80,15 @@ var searchItem = react.registerComponent(() => new _SearchItem());
 
 class _Search extends react.Component {
   FeedStore feedStore = new FeedStore();
+  EventDispatcher eventDispatcher = new EventDispatcher();
 
   getInitialState(){
     return {"searchResult": feedStore.items};
   }
 
   componentDidMount(domNode) {
-    feedStore.Attach(_onChange);
-    _onSubmit("dingo");
+    eventDispatcher.attach(_onChange);
+    //_onSubmit("dingo");
   }
 
   searchTable(List<SearchItem> items) {

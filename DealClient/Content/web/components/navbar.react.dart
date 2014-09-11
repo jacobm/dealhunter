@@ -3,6 +3,7 @@ library Navbar;
 import "package:react/react.dart" as react;
 import "../actions/app_actions.dart" as Actions;
 import "../stores/user_store.dart";
+import '../dispatcher/event_dispatcher.dart';
 
 class _GoogleLoginButton extends react.Component {
 
@@ -49,12 +50,13 @@ var currentUser = react.registerComponent(() => new _CurrentUser());
 
 class _NavBar extends react.Component {
   UserStore userStore;
+  EventDispatcher eventDispatcher = new EventDispatcher();
 
   CurrentUser get User => this.state["User"];
 
   componentWillMount() {
     userStore = new UserStore();
-    userStore.Attach(_onUserEvent);
+    eventDispatcher.attach(_onUserEvent);
   }
 
   getInitialState(){
