@@ -4,6 +4,7 @@ import "package:react/react.dart" as react;
 import "../actions/app_actions.dart" as Actions;
 import "../stores/user_store.dart";
 import '../dispatcher/event_dispatcher.dart';
+import '../actions/app_events.dart' as AppEvents;
 
 class _GoogleLoginButton extends react.Component {
 
@@ -79,10 +80,10 @@ class _NavBar extends react.Component {
 
   _onUserEvent(event) {
     switch(event) {
-      case UserStore.UserLoggedInEvent:
+      case AppEvents.UserLoggedInEvent:
         this.setState({"User": userStore.User});
         break;
-      case UserStore.UserLoggedOutEvent:
+      case AppEvents.UserLoggedOutEvent:
          this.setState({"User": userStore.User});
          break;
       default:

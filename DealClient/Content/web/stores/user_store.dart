@@ -8,6 +8,7 @@ import '../constants/app_constants.dart' as AppConstants;
 import '../dispatcher/app_dispatcher.dart';
 import "package:google_plus_v1_api/plus_v1_api_browser.dart" as plusclient;
 import '../dispatcher/event_dispatcher.dart';
+import '../actions/app_events.dart' as AppEvents;
 
 
 class CurrentUser {
@@ -22,8 +23,6 @@ class CurrentUser {
 
 
 class UserStore {
-  static const UserLoggedInEvent = "UserLoggedInEvent";
-  static const UserLoggedOutEvent = "UserLoggedOutEvent";
   static final UserStore _singleton = new UserStore._internal();
   CurrentUser _user = null;
   GoogleOAuth2 auth = null;
@@ -64,7 +63,7 @@ class UserStore {
   _logoutUser() {
     auth.logout();
     _user = null;
-    eventDispatcher.handleEvent(UserLoggedOutEvent);
+    eventDispatcher.publishEvent(AppEvents.UserLoggedOutEvent);
   }
 
   _loginUser() {
@@ -75,7 +74,7 @@ class UserStore {
        return plus.people.get("me");
     }).then((Person person){
       _user = new CurrentUser(person.name.givenName, person.image.url);
-      eventDispatcher.handleEvent(UserLoggedInEvent);
+      eventDispatcher.publishEvent(AppEvents.UserLoggedInEvent);
     });
   }
 

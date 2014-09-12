@@ -6,9 +6,9 @@ import '../constants/app_constants.dart' as AppConstants;
 import '../dispatcher/app_dispatcher.dart';
 import '../dispatcher/event_dispatcher.dart';
 import "dart:convert";
+import '../actions/app_events.dart' as AppEvents;
 
 class FeedStore {
-  static const SearchResultReady = "SeachResultReady";
   List<SearchItem> _searchItems = new List<SearchItem>();
   EventDispatcher eventDispatcher = new EventDispatcher();
 
@@ -37,7 +37,10 @@ class FeedStore {
   }
 
   void _onEvent(event) {
-    print(event);
+    switch(event) {
+      case AppEvents.UserLoggedInEvent:
+        break;
+    }
   }
 
   void _onAction(action){

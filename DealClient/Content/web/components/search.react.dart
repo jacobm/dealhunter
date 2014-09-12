@@ -5,6 +5,7 @@ import "package:react/react.dart" as react;
 import "../actions/app_actions.dart" as Actions;
 import "../stores/feed_store.dart";
 import '../dispatcher/event_dispatcher.dart';
+import '../actions/app_events.dart';
 
 var ENTER_KEY_CODE = 13;
 
@@ -112,7 +113,7 @@ class _Search extends react.Component {
 
   _onChange(String change) {
     switch(change) {
-      case FeedStore.SearchResultReady:
+      case SearchResultReady:
         _searchResults = feedStore.items;
         break;
     }
