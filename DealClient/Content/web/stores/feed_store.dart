@@ -29,7 +29,7 @@ class FeedStore {
                .then((response) {
       var items = JSON.decode(response);
       _searchItems = items.map((x) => new SearchItem.fromMap(x)).toList();
-      eventDispatcher.handleEvent(SearchResultReady);
+      eventDispatcher.publishEvent(AppEvents.SearchResultReady);
     }).catchError((error){
       print(error);
     });
