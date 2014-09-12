@@ -1,6 +1,5 @@
 library FeedStore;
 
-import 'dart:async';
 import 'dart:html';
 import '../constants/app_constants.dart' as AppConstants;
 import '../dispatcher/app_dispatcher.dart';

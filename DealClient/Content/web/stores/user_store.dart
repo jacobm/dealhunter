@@ -1,6 +1,5 @@
 library UserStore;
 
-import 'dart:async';
 import "package:google_oauth2_client/google_oauth2_browser.dart";
 import "package:google_plus_v1_api/plus_v1_api_browser.dart";
 import "package:google_plus_v1_api/plus_v1_api_client.dart";

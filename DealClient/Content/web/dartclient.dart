@@ -2,14 +2,8 @@ import "package:react/react.dart" as react;
 import "package:react/react_client.dart";
 import "dart:html";
 import "components/application.react.dart";
-import "components/search.react.dart";
-import "components/feed_watches.react.dart";
-import "stores/feed_store.dart";
-import "stores/user_store.dart";
 import "dispatcher/app_dispatcher.dart";
 import "constants/app_constants.dart" as AppConstants;
-import "package:route/client.dart";
-import "package:route/url_pattern.dart";
 
 class _Item extends react.Component {
   componentWillReceiveProps(newProps) {
@@ -30,51 +24,6 @@ class _Item extends react.Component {
 
 var item = react.registerComponent(() => new _Item());
 
-class _List extends react.Component {
-  var items = ['item1', 'item2', 'item3'];
-
-  remove() {
-    items.removeAt(0);
-    redraw();
-  }
-
-  render() {
-    return react.div({}, [debugButton({}),
-                          feedWatches({}),
-                          userDisplay({}),
-                          searchTextInput({})]);
-  }
-}
-var list = react.registerComponent(() => new _List());
-
-class _UserDisplay extends react.Component {
-
-  getInitialState(){
-    return {"user": null};
-  }
-
-  componentDidMount(domNode) {
-    new UserStore().Attach(_onChange);
-  }
-
-  render() {
-    if(_user != null)
-    {
-    return react.div({}, [_user.name + "  " + _user.imageUrl]);
-    }
-    else
-    {
-      return react.div({});
-    }
-  }
-
-  CurrentUser get _user => this.state["user"];
-
-  _onChange(String event){
-    this.setState({"user": new UserStore().User});
-  }
-}
-var userDisplay = react.registerComponent(() => new _UserDisplay());
 
 class _DebugButton extends react.Component {
 

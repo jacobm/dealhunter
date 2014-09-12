@@ -1,6 +1,5 @@
 library Application;
 
-import "dart:html";
 import "package:react/react.dart" as react;
 import "../dispatcher/app_dispatcher.dart";
 import "../constants/app_constants.dart" as AppConstants;
