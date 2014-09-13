@@ -12,10 +12,11 @@ search(String text) {
   });
 }
 
-login(){
+login(String accessToken, String code){
   dispatcher.handleAction({
     "actionType": AppConstants.LoginUser,
-    "payload": {}
+    "payload": {"accessToken": accessToken,
+                "code": code}
   });
 }
 
