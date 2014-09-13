@@ -1,10 +1,14 @@
 library Navbar;
 
+import "dart:js" as js;
+import "dart:html" as html;
+
 import "package:react/react.dart" as react;
 import "../actions/app_actions.dart" as Actions;
 import "../stores/user_store.dart";
 import '../dispatcher/event_dispatcher.dart';
 import '../actions/app_events.dart' as AppEvents;
+import '../constants/app_constants.dart' as AppConstants;
 
 class _GoogleLoginButton extends react.Component {
 
@@ -14,8 +18,15 @@ class _GoogleLoginButton extends react.Component {
     js.context['signInCallback'] = signInCallback;
   }
 
-  _onLogoutClick(event) {
-    Actions.logout();
+  signInCallback(data){
+    var token = data["access_token"];
+    var code = data["code"];
+    if (code != null){
+      Actions.login(token, code);
+    } else {
+      print("login failed");
+    }
+  }
 
   void inject(String javascript){
     html.ScriptElement s = html.window.document.createElement('script');
