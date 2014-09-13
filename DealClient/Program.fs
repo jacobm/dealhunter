@@ -7,14 +7,21 @@ module Site  =
     open Nancy
     open Nancy.Hosting.Self
     open Nancy.TinyIoc
+    open Newtonsoft.Json
+
+    // fixme: move to common place
+    let (?) (parameters : obj) param = (parameters :?> Nancy.DynamicDictionary).[param]
+
+    type codePostItem = {code: string}
 
     type DealClient() as self = 
         inherit NancyModule()
 
         do 
-            self.Get.["/"] <- fun parameters ->
-                //self.View.["index.html"] :> obj
-                self.Response.AsFile("Content/index.html", "text/html") :> obj
+            self.Post.["/api/login"] <- fun _ ->
+                use reader = new StreamReader(self.Request.Body)
+                let token = JsonConvert.DeserializeObject<codePostItem>(reader.ReadToEnd())
+                true :> obj
 
         type DartClientBootstrapper() =
             inherit DefaultNancyBootstrapper()
