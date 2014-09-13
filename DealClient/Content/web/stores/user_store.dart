@@ -38,7 +38,7 @@ class UserStore {
     eventDispatcher.attach(_onEvent);
     auth = new GoogleOAuth2(
           AppConstants.googleClientId,
-          ["openid", "email", plusclient.Plus.PLUS_ME_SCOPE],
+          ["openid", plusclient.Plus.PLUS_ME_SCOPE],
           tokenLoaded: _tokenLoaded);
   }
 
