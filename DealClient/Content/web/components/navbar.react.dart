@@ -8,21 +8,33 @@ import '../actions/app_events.dart' as AppEvents;
 
 class _GoogleLoginButton extends react.Component {
 
-  _onClick(event) {
-    Actions.login();
+  componentDidMount(data){
+    var google = "(function(){var po = document.createElement('script');po.type = 'text/javascript';po.async = true;po.src = 'https://apis.google.com/js/client:plusone.js';var s = document.getElementsByTagName('script')[0];s.parentNode.insertBefore(po, s);})()";
+    inject(google);
+    js.context['signInCallback'] = signInCallback;
   }
 
   _onLogoutClick(event) {
     Actions.logout();
+
+  void inject(String javascript){
+    html.ScriptElement s = html.window.document.createElement('script');
+    s.type ="text/javascript";
+    s.text = javascript;
+    html.document.body.nodes.add(s);
   }
 
   render (){
-    return react.div({},
-      [react.a({"onClick": _onClick,
-                "className": "sign-in btn btn-block btn-social btn-google-plus"},
-                [react.i({"className": "fa fa-google-plus"}),
-                 "Sign in with Google"])]
-    );
+    return react.div({"id": "signinButton"},
+        react.span({
+            "className": "g-signin",
+            "data-scope": "https://www.googleapis.com/auth/plus.login",
+            "data-clientid": AppConstants.googleClientId,
+            "data-redirecturi": "postmessage",
+            "data-accesstype": "online",
+            "data-cookiepolicy": "single_host_origin",
+            "data-callback": "signInCallback"})
+        );
   }
 }
 var googleLoginButton = react.registerComponent(() => new _GoogleLoginButton());
