@@ -149,8 +149,8 @@ module FetcherRobot =
 
         let logCurrent item  : SearchTerm * DbaId option =
             let it = match item with
-                    | (SearchTerm _, None) -> log "Fresh import"
-                    | (SearchTerm _, Some (DbaId x)) -> log ("Importing from " + x)
+                     | (SearchTerm _, None) -> log "Fresh import"
+                     | (SearchTerm _, Some (DbaId x)) -> log ("Importing from " + x)
             item
 
         let logImportedItems (SearchTerm term, listings) =
