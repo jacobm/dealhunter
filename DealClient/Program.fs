@@ -157,6 +157,9 @@ module Site  =
                     fileStream.CopyTo(stream)
 
             override self.ApplicationStartup(container : TinyIoCContainer, pipelines : Nancy.Bootstrapper.IPipelines) =
+
+                CookieBasedSessions.Enable(pipelines) |> ignore
+
                 self.Conventions.StaticContentsConventions.Insert(0, fun context name ->
                     match context.Request.Method, not (context.Request.Path.ToLowerInvariant().StartsWith("/api")) with
                     | "GET", true -> 
