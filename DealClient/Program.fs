@@ -57,6 +57,20 @@ module SigninValidation =
         let result = parseIdToken token
         (Id result.sub)
 
+module DealClientSettings =
+    open System
+    open ScraperCommon.Settings
+
+    let postgreConnectionString (environment : string) =
+        let user = get "postgre.user"
+        let password = get "postgre.password"
+        match environment.ToLowerInvariant() with
+        | "development" -> String.Format("User ID={0};Password={1};Host=localhost;Port=5432;Database=UserState;", user, password)
+        | "production" -> let host = getEnvironmentValue "DEALCLIENTDB_PORT_5432_TCP_ADDR"
+                          String.Format("User ID={0};Password={1};Host={2};Port=5432;Database=UserState;", user, password, host)
+        | _ -> raise (Exception("Unknown environment: " + environment))
+
+
 module Site  =
     open System
     open System.Text
