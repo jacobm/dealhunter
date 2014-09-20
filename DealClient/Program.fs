@@ -1,4 +1,8 @@
 ﻿
+module DealClientTypes =
+    type TermPosition = { term : string; position : string }
+    type UserData = { positions : TermPosition list }
+    type GoogleId = Id of string
 module Site  =
     open System
     open System.Text
