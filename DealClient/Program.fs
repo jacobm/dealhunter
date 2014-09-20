@@ -128,21 +128,57 @@ module Site  =
     open Nancy
     open Nancy.Hosting.Self
     open Nancy.TinyIoc
+    open Nancy.Session
     open Newtonsoft.Json
+    open SigninValidation
+    open ScraperCommon.Settings
+    open DealClientTypes
 
     // fixme: move to common place
     let (?) (parameters : obj) param = (parameters :?> Nancy.DynamicDictionary).[param]
 
-    type codePostItem = {code: string}
+    let setUserIdInSession (session : ISession) (googleId : GoogleId option) =
+         session.["GoogleId"] <- googleId
+
+    let getUserIdFromSession (session : ISession) =
+        session.["GoogleId"]  :?> (GoogleId option)
+        
 
     type DealClient() as self = 
         inherit NancyModule()
 
         do 
+            let postgre = DealClientSettings.postgreConnectionString (get "environment")
+
+            let handleUserData googleId =
+                let userdata = Persistence.getUserData postgre googleId
+                let result = match userdata with
+                             | None -> { positions = [] }
+                             | Some x ->  x
+                JsonConvert.SerializeObject(result)
+
             self.Post.["/api/login"] <- fun _ ->
                 use reader = new StreamReader(self.Request.Body)
-                let token = JsonConvert.DeserializeObject<codePostItem>(reader.ReadToEnd())
-                true :> obj
+                let codeRequest = JsonConvert.DeserializeObject<CodePostItem>(reader.ReadToEnd())
+                let googleId = getUserId codeRequest.code
+                setUserIdInSession self.Session (Some googleId)
+                (handleUserData googleId) :> obj
+
+            self.Get.["/api/userdata"] <- fun _ ->
+                let googleId = getUserIdFromSession self.Session
+                match googleId with
+                | None -> HttpStatusCode.Unauthorized :> obj
+                | Some id -> (handleUserData id) :> obj
+ 
+            self.Post.["/api/userdata"] <- fun _ ->
+                let googleId = getUserIdFromSession self.Session
+                match googleId with
+                | None -> HttpStatusCode.Unauthorized :> obj
+                | Some id ->
+                    use reader = new StreamReader(self.Request.Body)
+                    let userdata = JsonConvert.DeserializeObject<UserData>(reader.ReadToEnd())
+                    Persistence.setUserData postgre id userdata
+                    "ok" :> obj
 
         type DartClientBootstrapper() =
             inherit DefaultNancyBootstrapper()
