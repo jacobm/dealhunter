@@ -178,8 +178,8 @@ module Site  =
     let main args = 
         StaticConfiguration.DisableErrorTraces <- false
         StaticConfiguration.Caching.EnableRuntimeViewUpdates <- true
-        //let nancyHost = new NancyHost(new Uri("http://localhost:8889/"), new Uri("http://127.0.0.1:8889/"))
-        let nancyHost = new NancyHost(new Uri("http://localhost:4000/"))
+        let port = get "port"
+        let nancyHost = new NancyHost(new Uri(String.Format("http://localhost:{0}/", port)))
         nancyHost.Start()
         printfn "ready..."
 
