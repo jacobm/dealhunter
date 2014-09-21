@@ -15,9 +15,8 @@ class CurrentUser {
   String name;
   String imageUrl;
 
-  CurrentUser(name, imageUrl){
-    this.name = name;
-    this.imageUrl = imageUrl;
+  CurrentUser(this.name, this.imageUrl);
+}
   }
 }
 
