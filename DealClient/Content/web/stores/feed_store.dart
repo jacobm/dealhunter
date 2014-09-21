@@ -10,6 +10,7 @@ import '../actions/app_events.dart' as AppEvents;
 class FeedStore {
   List<SearchItem> _searchItems = new List<SearchItem>();
   EventDispatcher eventDispatcher = new EventDispatcher();
+  State _userState = null;
 
   static final FeedStore _singleton = new FeedStore._internal();
 
@@ -21,6 +22,8 @@ class FeedStore {
     new AppDispatcher().attach(_onAction);
     eventDispatcher.attach(_onEvent);
   }
+
+  State get UserState => _userState;
 
   List<SearchItem> get items => _searchItems;
 
@@ -37,9 +40,27 @@ class FeedStore {
 
   void _onEvent(Map event) {
     switch(event["eventType"]) {
-      case AppConstants.UserLoggedInEvent:
+      case AppConstants.GoogleCodeReceivedEvent:
+        _onGoogleCodeReceived(event["payload"]["code"]);
         break;
     }
+  }
+
+  void _onGoogleCodeReceived(String code){
+    HttpRequest.request(
+        "api/login",
+        method: 'POST',
+        requestHeaders:{'Content-Type': 'application/json;charset=utf-8'},
+        sendData: JSON.encode({"code": code}))
+    .then((HttpRequest response){
+      if (response.status != 200){
+         throw new Exception("Server login failed");
+      }
+
+      _userState = new State.fromString(response.responseText);
+      AppEvents.PublishUserStateUpdatedEvent();
+    });
+
   }
 
   void _onAction(action){
@@ -48,6 +69,28 @@ class FeedStore {
         _search(action["payload"]["searchTerm"]);
         break;
     }
+  }
+}
+
+class TermPosition {
+  String term;
+  String position;
+
+  TermPosition(this.term, this.position);
+}
+
+class State {
+  List<TermPosition> _positions = new List<TermPosition>();
+
+  State(this._positions);
+
+  factory State.fromString(String value){
+    var json = JSON.decode(JSON.decode(value)); // fix escapes
+    var positions = json["positions"].map((x){
+      return new TermPosition(x["term"], x["position"]);
+    }).toList();
+
+    return new State(positions);
   }
 }
 

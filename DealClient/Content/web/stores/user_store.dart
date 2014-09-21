@@ -18,39 +18,16 @@ class CurrentUser {
   CurrentUser(this.name, this.imageUrl);
 }
 
-class TermPosition {
-  String term;
-  String position;
-
-  TermPosition(this.term, this.position);
-}
-
-class State {
-  List<TermPosition> _positions = new List<TermPosition>();
-
-  State(this._positions);
-
-  factory State.fromString(String value){
-    var json = JSON.decode(JSON.decode(value)); // fix escapes
-    var positions = json["positions"].map((x){
-      return new TermPosition(x["term"], x["position"]);
-    }).toList();
-
-    return new State(positions);
-  }
-}
 
 
 class UserStore {
   static final UserStore _singleton = new UserStore._internal();
   CurrentUser _user = null;
-  State _userState = null;
   GoogleOAuth2 auth = null;
   EventDispatcher eventDispatcher = new EventDispatcher();
 
   CurrentUser get User => _user;
 
-  State get UserState => _userState;
 
   factory UserStore() {
     return _singleton;
@@ -91,21 +68,8 @@ class UserStore {
   }
 
   _loginUser(accessToken, code) {
+    AppEvents.PublishGoogleCodeReceivedEvent(code);
     auth.login(immediate: false, onlyLoadToken : true).then((Token token){
-       HttpRequest.request(
-           "api/login",
-           method: 'POST',
-           requestHeaders:{'Content-Type': 'application/json;charset=utf-8'},
-           sendData: JSON.encode({"code": code}))
-       .then((HttpRequest response){
-         if (response.status != 200){
-            throw new Exception("Server login failed");
-         }
-
-         _userState = new State.fromString(response.responseText);
-         AppEvents.PublishUserStateUpdatedEvent(code);
-       });
-
        var plus = new Plus(auth);
        plus.key = AppConstants.googleClientId;
        plus.oauth_token = token.data;

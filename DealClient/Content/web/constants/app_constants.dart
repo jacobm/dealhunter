@@ -6,7 +6,9 @@ const String AppSearch = "AppSearch";
 const String LoginUser = "LoginUser";
 const String LogoutUser = "LogoutUser";
 
-const SearchResultReady = "SeachResultReadyEvent";
-const UserLoggedInEvent = "UserLoggedInEvent";
-const UserLoggedOutEvent = "UserLoggedOutEvent";
-const UserStateUpdated = "UserStateUpdatedEvent";
+const String SearchResultReady = "SeachResultReadyEvent";
+const String UserLoggedInEvent = "UserLoggedInEvent";
+const String UserLoggedOutEvent = "UserLoggedOutEvent";
+const String UserStateUpdated = "UserStateUpdatedEvent";
+const String GoogleCodeReceivedEvent = "GoogleCodeReceivedEvent";
+

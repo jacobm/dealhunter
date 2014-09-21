@@ -24,9 +24,16 @@ PublishUserLoggedOutEvent() {
   });
 }
 
-PublishUserStateUpdatedEvent(String code){
+PublishGoogleCodeReceivedEvent(String code){
+  dispatcher.publishEvent({
+    "eventType": AppConstants.GoogleCodeReceivedEvent,
+    "payload": {"code": code}
+  });
+}
+
+PublishUserStateUpdatedEvent(){
   dispatcher.publishEvent({
     "eventType": AppConstants.UserStateUpdated,
-    "payload": {"code": code}
+    "payload": {}
   });
 }
