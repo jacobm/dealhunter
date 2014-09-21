@@ -17,6 +17,26 @@ class CurrentUser {
 
   CurrentUser(this.name, this.imageUrl);
 }
+
+class TermPosition {
+  String term;
+  String position;
+
+  TermPosition(this.term, this.position);
+}
+
+class State {
+  List<TermPosition> _positions = new List<TermPosition>();
+
+  State(this._positions);
+
+  factory State.fromString(String value){
+    var json = JSON.decode(JSON.decode(value)); // fix escapes
+    var positions = json["positions"].map((x){
+      return new TermPosition(x["term"], x["position"]);
+    }).toList();
+
+    return new State(positions);
   }
 }
 
