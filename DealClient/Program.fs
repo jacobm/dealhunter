@@ -143,6 +143,13 @@ module Site  =
     let getUserIdFromSession (session : ISession) =
         session.["GoogleId"]  :?> (GoogleId option)
         
+    let okResponse body = 
+        let data = Encoding.UTF8.GetBytes(JsonConvert.SerializeObject(body))
+        let resp = new Response()
+        resp.StatusCode <- HttpStatusCode.OK
+        resp.ContentType <- "application/json;charset=utf-8"
+        resp.Contents <- fun s -> s.Write(data, 0, data.Length)
+        resp
 
     type DealClient() as self = 
         inherit NancyModule()
@@ -162,7 +169,7 @@ module Site  =
                 let codeRequest = JsonConvert.DeserializeObject<CodePostItem>(reader.ReadToEnd())
                 let googleId = getUserId codeRequest.code
                 setUserIdInSession self.Session (Some googleId)
-                (handleUserData googleId) :> obj
+                handleUserData googleId |> okResponse :> obj
 
             self.Get.["/api/userdata"] <- fun _ ->
                 let googleId = getUserIdFromSession self.Session
