@@ -44,10 +44,13 @@ class State {
 class UserStore {
   static final UserStore _singleton = new UserStore._internal();
   CurrentUser _user = null;
+  State _userState = null;
   GoogleOAuth2 auth = null;
   EventDispatcher eventDispatcher = new EventDispatcher();
 
   CurrentUser get User => _user;
+
+  State get UserState => _userState;
 
   factory UserStore() {
     return _singleton;
@@ -89,29 +92,30 @@ class UserStore {
 
   _loginUser(accessToken, code) {
     auth.login(immediate: false, onlyLoadToken : true).then((Token token){
-       var request = HttpRequest.request(
-           "/api/login",
+       HttpRequest.request(
+           "api/login",
            method: 'POST',
            requestHeaders:{'Content-Type': 'application/json;charset=utf-8'},
-           sendData: JSON.encode({"code": code}));
+           sendData: JSON.encode({"code": code}))
+       .then((HttpRequest response){
+         if (response.status != 200){
+            throw new Exception("Server login failed");
+         }
+
+         _userState = new State.fromString(response.responseText);
+         eventDispatcher.publishEvent(AppEvents.UserStateUpdated);
+       });
 
        var plus = new Plus(auth);
        plus.key = AppConstants.googleClientId;
        plus.oauth_token = token.data;
-
-       return Future.wait([request, plus.people.get("me")]);
-    }).then((List responses){
-      var serverResponse = responses[0];
-      if (serverResponse.responseText != "true"){
-        throw new Exception("Server login failed");
-      }
-      var person = responses[1];
-      _user = new CurrentUser(person.name.givenName, person.image.url);
-      eventDispatcher.publishEvent(AppEvents.UserLoggedInEvent);
-    }).catchError((error){
-      print(error);
+       plus.people.get("me").then((person){
+          _user = new CurrentUser(person.name.givenName, person.image.url);
+          eventDispatcher.publishEvent(AppEvents.UserLoggedInEvent);
+       });
     });
   }
+
 
   _tokenLoaded(token){
   }
