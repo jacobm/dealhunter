@@ -65,7 +65,7 @@ class UserStore {
           tokenLoaded: _tokenLoaded);
   }
 
-  void _onEvent(String event){
+  void _onEvent(Map event){
   }
 
   void _onAction(action){
@@ -87,7 +87,7 @@ class UserStore {
   _logoutUser() {
     auth.logout();
     _user = null;
-    eventDispatcher.publishEvent(AppEvents.UserLoggedOutEvent);
+    AppEvents.PublishUserLoggedOutEvent();
   }
 
   _loginUser(accessToken, code) {
@@ -103,7 +103,7 @@ class UserStore {
          }
 
          _userState = new State.fromString(response.responseText);
-         eventDispatcher.publishEvent(AppEvents.UserStateUpdated);
+         AppEvents.PublishUserStateUpdatedEvent(code);
        });
 
        var plus = new Plus(auth);
@@ -111,7 +111,7 @@ class UserStore {
        plus.oauth_token = token.data;
        plus.people.get("me").then((person){
           _user = new CurrentUser(person.name.givenName, person.image.url);
-          eventDispatcher.publishEvent(AppEvents.UserLoggedInEvent);
+          AppEvents.PublishUserLoggedInEvent();
        });
     });
   }

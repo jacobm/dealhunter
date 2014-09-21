@@ -16,7 +16,7 @@ class EventDispatcher {
     eventCtrl.stream.listen(listener);
   }
 
-  void publishEvent(String eventName){
-    eventCtrl.add(eventName);
+  void publishEvent(event){
+    eventCtrl.add(event);
   }
 }

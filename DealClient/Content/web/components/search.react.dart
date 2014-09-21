@@ -5,7 +5,9 @@ import "package:react/react.dart" as react;
 import "../actions/app_actions.dart" as Actions;
 import "../stores/feed_store.dart";
 import '../dispatcher/event_dispatcher.dart';
-import '../actions/app_events.dart';
+import '../actions/app_events.dart' as AppEvents;
+import '../constants/app_constants.dart' as AppConstants;
+
 
 var ENTER_KEY_CODE = 13;
 
@@ -111,9 +113,9 @@ class _Search extends react.Component {
     Actions.search(text);
   }
 
-  _onChange(String change) {
-    switch(change) {
-      case SearchResultReady:
+  _onChange(Map event) {
+    switch(event["eventType"]) {
+      case AppConstants.SearchResultReady:
         _searchResults = feedStore.items;
         break;
     }

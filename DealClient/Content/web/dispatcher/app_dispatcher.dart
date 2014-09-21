@@ -17,7 +17,6 @@ class AppDispatcher {
   }
 
   void handleAction(payload){
-    print("Dispatching " + payload["actionType"]);
     actionStream.add(payload);
   }
 }

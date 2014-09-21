@@ -29,15 +29,15 @@ class FeedStore {
                .then((response) {
       var items = JSON.decode(response);
       _searchItems = items.map((x) => new SearchItem.fromMap(x)).toList();
-      eventDispatcher.publishEvent(AppEvents.SearchResultReady);
+      AppEvents.PublishSearchResultReady(term);
     }).catchError((error){
       print(error);
     });
   }
 
-  void _onEvent(event) {
-    switch(event) {
-      case AppEvents.UserLoggedInEvent:
+  void _onEvent(Map event) {
+    switch(event["eventType"]) {
+      case AppConstants.UserLoggedInEvent:
         break;
     }
   }
