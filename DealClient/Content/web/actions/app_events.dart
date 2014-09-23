@@ -5,10 +5,9 @@ import "../constants/app_constants.dart" as AppConstants;
 
 EventDispatcher dispatcher = new EventDispatcher();
 
-PublishSearchResultReady(String searchTerm) {
+PublishSearchResultReady() {
   dispatcher.publishEvent({
     "eventType": AppConstants.SearchResultReady,
-    "payload": {"searchTerm": searchTerm}
   });
 }
 PublishUserLoggedInEvent() {
