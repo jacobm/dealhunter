@@ -9,22 +9,6 @@ import "../components/navbar.react.dart";
 import "package:route/client.dart";
 import "package:route/url_pattern.dart";
 
-
-class _DebugButton extends react.Component {
-
-  _onClick(event){
-    new AppDispatcher().handleAction(
-        {"actionType": AppConstants.LoginUser,
-         "payload": "dingo"}
-        );
-  }
-
-  render() {
-    return react.button({"onClick": (e) => _onClick(e)}, "Login");
-  }
-}
-var debugButton = react.registerComponent(() => new _DebugButton());
-
 class _Application extends react.Component {
   componentWillMount(){
     var router = new Router(useFragment: true)
