@@ -1,14 +1,8 @@
 library Search;
 
-import 'package:intl/intl.dart';
 import "package:react/react.dart" as react;
 import "../actions/app_actions.dart" as Actions;
 import "../stores/feed_store.dart";
-import "../stores/user_store.dart";
-import '../dispatcher/event_dispatcher.dart';
-import '../actions/app_events.dart' as AppEvents;
-import '../constants/app_constants.dart' as AppConstants;
-
 
 var ENTER_KEY_CODE = 13;
 
@@ -43,19 +37,19 @@ class _SearchTextInput extends react.Component {
 
   render() {
     return
-        react.div({"className": "row center-block"}, [
-        react.div({"className": "col-sm-6 col-md-6"},
-              react.input(
-              {"onChange": (e) => _onChange(e),
-               "onSubmit": (e) => _onSubmit(),
-               "onKeyDown": (e) => _onKeyDown(e),
-               "value" : _value,
-               "placeholder": "Search",
-               "className": "form-control"})),
-        react.div({"className": "col-sm-3 col-md-3 input-group"},
-             [react.button({"onClick": (e) => _onSubmit(),
-                            "className": "btn btn-primary"},
-                 react.i({"className": "glyphicon glyphicon-search"}))])]
+        react.div({}, [
+          react.div({"className": "col-sm-4 col-md-4"},
+                react.input(
+                {"onChange": (e) => _onChange(e),
+                 "onSubmit": (e) => _onSubmit(),
+                 "onKeyDown": (e) => _onKeyDown(e),
+                 "value" : _value,
+                 "placeholder": "Search",
+                 "className": "form-control"})),
+          react.div({"className": "col-sm-4 col-md-4 input-group"},
+               [react.button({"onClick": (e) => _onSubmit(),
+                              "className": "btn btn-primary"},
+                   react.i({"className": "glyphicon glyphicon-search"}))])]
     );
   }
 
@@ -63,52 +57,29 @@ class _SearchTextInput extends react.Component {
 }
 var searchTextInput = react.registerComponent(() => new _SearchTextInput());
 
-class _SearchItem extends react.Component {
-
-  SearchItem get item => this.props["item"];
+class _AddToWatchesButton extends react.Component {
 
   render() {
-    var formatter = new DateFormat('dd-MM-yyyy');
-    var date = formatter.format(item.postedAt);
-
-    return react.li({"className": "row"},
-        [react.img({"src": item.thumbnail, "className": "col-md-4"}),
-         react.span({"className": "col-md-1"}, item.price.toString() + " kr"),
-         react.span({"className": "col-md-1"}, date),
-         react.span({"className": "col-md-4"}, item.location.postcode.toString() + " - " + item.location.city),
-              react.span({"className": "col-md-6"},
-             [item.text])]);
+    return
+        react.div({"className": "col-sm-4 col-md-4"},
+            [react.button({"className": "btn btn-primary"}, "Watch")]);
   }
 }
-var searchItem = react.registerComponent(() => new _SearchItem());
+var addToWatchesButton = react.registerComponent(() => new _AddToWatchesButton());
 
-class _Search extends react.Component {
-  EventDispatcher eventDispatcher = new EventDispatcher();
-
-  searchTable(Searchresult result) {
-    if (result == null){
-      return react.ul({});
-    }
-
-    var res = result.items.map((x) => searchItem({"item": x}));
-    return react.ul({}, res);
-  }
-
+class _SearchBar extends react.Component {
   render() {
-    if (_isLoggedIn){
-        react.button({}, "Save search");
-    }
-
-    return react.div({"className" : this.props["className"]},
+    return react.div({"className": "row center-block"},
         [searchTextInput({"onSubmit": _onSubmit}),
-         searchTable(_searchResult)]);
+         addToWatchesButton({})]);
   }
 
   bool get _isLoggedIn => this.props["isLoggedIn"];
   Searchresult get _searchResult => this.props["searchResult"];
+  UserFeedWatches get _feedWatches => this.props["userState"];
 
   _onSubmit(String text) {
-    Actions.search(text);
+     Actions.search(text);
   }
 }
-var search = react.registerComponent(() => new _Search());
+var searchBar = react.registerComponent(() => new _SearchBar());
