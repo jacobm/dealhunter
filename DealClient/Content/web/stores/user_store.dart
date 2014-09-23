@@ -1,7 +1,5 @@
 library UserStore;
 
-import 'dart:async';
-import "dart:html";
 import "package:google_oauth2_client/google_oauth2_browser.dart";
 import "package:google_plus_v1_api/plus_v1_api_browser.dart";
 import '../constants/app_constants.dart' as AppConstants;
@@ -9,7 +7,6 @@ import '../dispatcher/app_dispatcher.dart';
 import "package:google_plus_v1_api/plus_v1_api_browser.dart" as plusclient;
 import '../dispatcher/event_dispatcher.dart';
 import '../actions/app_events.dart' as AppEvents;
-import "dart:convert";
 
 class CurrentUser {
   String name;
@@ -18,8 +15,6 @@ class CurrentUser {
   CurrentUser(this.name, this.imageUrl);
 }
 
-
-
 class UserStore {
   static final UserStore _singleton = new UserStore._internal();
   CurrentUser _user = null;
@@ -27,6 +22,7 @@ class UserStore {
   EventDispatcher eventDispatcher = new EventDispatcher();
 
   CurrentUser get User => _user;
+  bool get IsLoggedIn => _user != null;
 
 
   factory UserStore() {
