@@ -17,7 +17,7 @@ class Searchresult {
 
 class FeedStore {
   EventDispatcher eventDispatcher = new EventDispatcher();
-  State _userState = null;
+  UserFeedWatches _userState = null;
   Searchresult _searchResult = null;
 
   static final FeedStore _singleton = new FeedStore._internal();
@@ -31,7 +31,7 @@ class FeedStore {
     eventDispatcher.attach(_onEvent);
   }
 
-  State get UserState => _userState;
+  UserFeedWatches get UserState => _userState;
 
   Searchresult get SearchResult => _searchResult;
 
@@ -42,7 +42,7 @@ class FeedStore {
       _searchResult = new Searchresult(
           term,
           items.map((x) => new SearchItem.fromMap(x)).toList());
-      AppEvents.PublishSearchResultReady(term);
+      AppEvents.PublishSearchResultReady();
     }).catchError((error){
       print(error);
     });
@@ -67,7 +67,7 @@ class FeedStore {
          throw new Exception("Server login failed");
       }
 
-      _userState = new State.fromString(response.responseText);
+      _userState = new UserFeedWatches.fromString(response.responseText);
       AppEvents.PublishUserStateUpdatedEvent();
     });
 
@@ -89,18 +89,18 @@ class TermPosition {
   TermPosition(this.term, this.position);
 }
 
-class State {
+class UserFeedWatches {
   List<TermPosition> _positions = new List<TermPosition>();
 
-  State(this._positions);
+  UserFeedWatches(this._positions);
 
-  factory State.fromString(String value){
+  factory UserFeedWatches.fromString(String value){
     var json = JSON.decode(JSON.decode(value)); // fix escapes
     var positions = json["positions"].map((x){
       return new TermPosition(x["term"], x["position"]);
     }).toList();
 
-    return new State(positions);
+    return new UserFeedWatches(positions);
   }
 }
 

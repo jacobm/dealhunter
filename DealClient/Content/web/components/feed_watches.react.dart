@@ -1,15 +1,15 @@
 library FeedWatches;
 
 import "package:react/react.dart" as react;
-import "../actions/app_actions.dart" as Actions;
 import "../stores/feed_store.dart";
 import '../dispatcher/event_dispatcher.dart';
-import '../actions/app_events.dart' as AppEvents;
 import '../constants/app_constants.dart' as AppConstants;
 
 class _FeedWatches extends react.Component {
   FeedStore feedStore;
   EventDispatcher eventDispatcher = new EventDispatcher();
+  UserFeedWatches _feedWatches;
+  UserFeedWatches get UserState => _feedWatches;
 
   componentWillMount() {
      feedStore = new FeedStore();
@@ -17,7 +17,11 @@ class _FeedWatches extends react.Component {
   }
 
   void _onFeedEvent(Map event){
-
+    switch(event["eventType"]){
+      case AppConstants.UserStateUpdated:
+        _feedWatches = feedStore.UserState;
+        break;
+    }
   }
 
   render() {
