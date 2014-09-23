@@ -5,6 +5,7 @@ import "../dispatcher/app_dispatcher.dart";
 import "../dispatcher/event_dispatcher.dart";
 import "../constants/app_constants.dart" as AppConstants;
 import "../components/search.react.dart";
+import "../components/item_list.react.dart";
 import "../stores/user_store.dart";
 import "../stores/feed_store.dart";
 import "../components/feed_watches.react.dart";
@@ -32,13 +33,18 @@ class _Application extends react.Component {
   }
 
   getInitialState() {
-      return {"searchResult" : null};
+      return {"searchResult" : null,
+              "isLoggedIn": false
+      };
   }
 
   _onEvent(Map event) {
     switch(event["eventType"]) {
       case AppConstants.SearchResultReady:
-        this.setState({"searchResult": _feedStore.SearchResult });
+      case AppConstants.UserLoggedOutEvent:
+      case AppConstants.UserLoggedInEvent:
+        this.setState({"searchResult": _feedStore.SearchResult,
+                       "isLoggedIn": _userStore.IsLoggedIn});
         break;
     }
   }
@@ -51,8 +57,8 @@ class _Application extends react.Component {
     return react.div({},
           [react.div({"className": "row"},
                       [navBar({}),
-                       search({"className" : "col-sm-8",
-                               "isLoggedIn": _userStore.IsLoggedIn,
+                       searchBar({}),
+                       itemList({"className" : "col-sm-8",
                                "searchResult": this.state["searchResult"]}),
                        feedWatches({"className": "col-sm-4"})
                       ])]);
