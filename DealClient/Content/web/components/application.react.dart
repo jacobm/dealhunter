@@ -2,14 +2,21 @@ library Application;
 
 import "package:react/react.dart" as react;
 import "../dispatcher/app_dispatcher.dart";
+import "../dispatcher/event_dispatcher.dart";
 import "../constants/app_constants.dart" as AppConstants;
 import "../components/search.react.dart";
+import "../stores/user_store.dart";
+import "../stores/feed_store.dart";
 import "../components/feed_watches.react.dart";
 import "../components/navbar.react.dart";
 import "package:route/client.dart";
 import "package:route/url_pattern.dart";
 
 class _Application extends react.Component {
+  static UserStore _userStore = new UserStore();
+  static FeedStore _feedStore = new FeedStore();
+  static EventDispatcher eventDispatcher = new EventDispatcher();
+
   componentWillMount(){
     var router = new Router(useFragment: true)
         ..addHandler(new UrlPattern('/'), _showHome)
@@ -20,42 +27,35 @@ class _Application extends react.Component {
     router.gotoPath("/#",  "Deal Home");
   }
 
-  var homeComponent = react.div({},
-      [react.div({"className": "row"},
-                  [navBar({}),
-                   search({"className" : "col-sm-8"}),
-                   feedWatches({"className": "col-sm-4"})
-                  ])
-      ]);
-  var searchComponent = react.div({}, "search");
-
-  getInitialState(){
-    return {"Component": homeComponent };
+  componentDidMount(domNode) {
+    eventDispatcher.attach(_onEvent);
   }
 
-  _showHome(String path){
-    this.setState({"Component": homeComponent});
+  getInitialState() {
+      return {"searchResult" : null};
   }
 
-  _showSearch(String path){
-    this.setState({"Component": searchComponent});
+  _onEvent(Map event) {
+    switch(event["eventType"]) {
+      case AppConstants.SearchResultReady:
+        this.setState({"searchResult": _feedStore.SearchResult });
+        break;
+    }
   }
 
-  _showCatchAll(String path) {
-  }
+  _showHome(String path){}
+  _showSearch(String path){}
+  _showCatchAll(String path) {}
 
   render() {
-    var it = this.state["Component"];
-    return it;
-
-    return react.div({"className": "container"},
-        [react.div({"className" : "row"},
-                    [react.div({"className": "col-sm-8"}, "Find deals"),
-                     react.div({"className": "col-sm-4"}, debugButton({}))]),
-                     react.div({"className": "row"}, [
-                        search({"className" : "col-sm-8"}),
-                        feedWatches({"className": "col-sm-4"})])
-                     ]);
+    return react.div({},
+          [react.div({"className": "row"},
+                      [navBar({}),
+                       search({"className" : "col-sm-8",
+                               "isLoggedIn": _userStore.IsLoggedIn,
+                               "searchResult": this.state["searchResult"]}),
+                       feedWatches({"className": "col-sm-4"})
+                      ])]);
   }
 }
 var application = react.registerComponent(() => new _Application());

@@ -4,6 +4,7 @@ import 'package:intl/intl.dart';
 import "package:react/react.dart" as react;
 import "../actions/app_actions.dart" as Actions;
 import "../stores/feed_store.dart";
+import "../stores/user_store.dart";
 import '../dispatcher/event_dispatcher.dart';
 import '../actions/app_events.dart' as AppEvents;
 import '../constants/app_constants.dart' as AppConstants;
@@ -82,43 +83,32 @@ class _SearchItem extends react.Component {
 var searchItem = react.registerComponent(() => new _SearchItem());
 
 class _Search extends react.Component {
-  FeedStore feedStore = new FeedStore();
   EventDispatcher eventDispatcher = new EventDispatcher();
 
-  getInitialState(){
-    return {"searchResult": feedStore.items};
-  }
+  searchTable(Searchresult result) {
+    if (result == null){
+      return react.ul({});
+    }
 
-  componentDidMount(domNode) {
-    eventDispatcher.attach(_onChange);
-    //_onSubmit("dingo");
-  }
-
-  searchTable(List<SearchItem> items) {
-    var res = items.map((x) => searchItem({"item": x}));
+    var res = result.items.map((x) => searchItem({"item": x}));
     return react.ul({}, res);
   }
 
   render() {
+    if (_isLoggedIn){
+        react.button({}, "Save search");
+    }
+
     return react.div({"className" : this.props["className"]},
         [searchTextInput({"onSubmit": _onSubmit}),
-         searchTable(_searchResults)]);
+         searchTable(_searchResult)]);
   }
 
-  List<SearchItem> get _searchResults => this.state["searchResult"];
-                   set _searchResults (List<SearchItem> value) =>
-                       this.setState({"searchResult": value});
+  bool get _isLoggedIn => this.props["isLoggedIn"];
+  Searchresult get _searchResult => this.props["searchResult"];
 
   _onSubmit(String text) {
     Actions.search(text);
-  }
-
-  _onChange(Map event) {
-    switch(event["eventType"]) {
-      case AppConstants.SearchResultReady:
-        _searchResults = feedStore.items;
-        break;
-    }
   }
 }
 var search = react.registerComponent(() => new _Search());
