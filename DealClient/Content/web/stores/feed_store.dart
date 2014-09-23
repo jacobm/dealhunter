@@ -7,10 +7,18 @@ import '../dispatcher/event_dispatcher.dart';
 import "dart:convert";
 import '../actions/app_events.dart' as AppEvents;
 
+// SearchResults => annoying warnings, seems like a bug in editor?
+class Searchresult {
+  String term;
+  List<SearchItem> items;
+
+  Searchresult(this.term, this.items);
+}
+
 class FeedStore {
-  List<SearchItem> _searchItems = new List<SearchItem>();
   EventDispatcher eventDispatcher = new EventDispatcher();
   State _userState = null;
+  Searchresult _searchResult = null;
 
   static final FeedStore _singleton = new FeedStore._internal();
 
@@ -25,13 +33,15 @@ class FeedStore {
 
   State get UserState => _userState;
 
-  List<SearchItem> get items => _searchItems;
+  Searchresult get SearchResult => _searchResult;
 
   _search(String term){
     HttpRequest.getString("http://localhost:8888/search/" + term)
                .then((response) {
       var items = JSON.decode(response);
-      _searchItems = items.map((x) => new SearchItem.fromMap(x)).toList();
+      _searchResult = new Searchresult(
+          term,
+          items.map((x) => new SearchItem.fromMap(x)).toList());
       AppEvents.PublishSearchResultReady(term);
     }).catchError((error){
       print(error);
