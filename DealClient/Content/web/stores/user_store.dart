@@ -22,8 +22,6 @@ class UserStore {
   EventDispatcher eventDispatcher = new EventDispatcher();
 
   CurrentUser get User => _user;
-  bool get IsLoggedIn => _user != null;
-
 
   factory UserStore() {
     return _singleton;

@@ -33,8 +33,9 @@ class _Application extends react.Component {
   }
 
   getInitialState() {
-      return {"searchResult" : null,
-              "isLoggedIn": false
+      return {"searchResult": _feedStore.SearchResult,
+              "feedWatches": _feedStore.FeedWatches,
+              "user": _userStore.User
       };
   }
 
@@ -43,8 +44,10 @@ class _Application extends react.Component {
       case AppConstants.SearchResultReady:
       case AppConstants.UserLoggedOutEvent:
       case AppConstants.UserLoggedInEvent:
+      case AppConstants.UserStateUpdated:
         this.setState({"searchResult": _feedStore.SearchResult,
-                       "isLoggedIn": _userStore.IsLoggedIn});
+                       "feedWatches": _feedStore.FeedWatches,
+                       "user": _userStore.User});
         break;
     }
   }
@@ -57,7 +60,9 @@ class _Application extends react.Component {
     return react.div({},
           [react.div({"className": "row"},
                       [navBar({}),
-                       searchBar({}),
+                       searchBar({"user": this.state["user"],
+                                  "searchResult": this.state["searchResult"],
+                                  "feedWatches": this.state["feedWatches"]}),
                        itemList({"className" : "col-sm-8",
                                "searchResult": this.state["searchResult"]}),
                        feedWatches({"className": "col-sm-4"})

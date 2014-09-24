@@ -31,7 +31,7 @@ class FeedStore {
     eventDispatcher.attach(_onEvent);
   }
 
-  UserFeedWatches get UserState => _userState;
+  UserFeedWatches get FeedWatches => _userState;
 
   Searchresult get SearchResult => _searchResult;
 
@@ -91,6 +91,8 @@ class TermPosition {
 
 class UserFeedWatches {
   List<TermPosition> _positions = new List<TermPosition>();
+
+  List<TermPosition> get Positions => _positions;
 
   UserFeedWatches(this._positions);
 

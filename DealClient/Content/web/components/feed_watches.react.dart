@@ -19,7 +19,7 @@ class _FeedWatches extends react.Component {
   void _onFeedEvent(Map event){
     switch(event["eventType"]){
       case AppConstants.UserStateUpdated:
-        _feedWatches = feedStore.UserState;
+        _feedWatches = feedStore.FeedWatches;
         break;
     }
   }

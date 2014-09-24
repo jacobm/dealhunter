@@ -3,6 +3,7 @@ library Search;
 import "package:react/react.dart" as react;
 import "../actions/app_actions.dart" as Actions;
 import "../stores/feed_store.dart";
+import "../stores/user_store.dart";
 
 var ENTER_KEY_CODE = 13;
 
@@ -19,6 +20,7 @@ class _SearchTextInput extends react.Component {
 
   _onChange(event) {
     this.setState({"value": event.target.value});
+    this.props["onChange"](event.target.value);
   }
 
   _onKeyDown(event) {
@@ -31,14 +33,13 @@ class _SearchTextInput extends react.Component {
     var value = this.state["value"];
     if (value != ""){
       this.props["onSubmit"](this.state["value"]);
-      this.setState({"value": ""});
     }
   }
 
   render() {
     return
-        react.div({}, [
-          react.div({"className": "col-sm-4 col-md-4"},
+        react.div({"className": "col-sm-6 col-md-6"}, [
+          react.div({"className": "col-sm-6 col-md-6"},
                 react.input(
                 {"onChange": (e) => _onChange(e),
                  "onSubmit": (e) => _onSubmit(),
@@ -68,18 +69,43 @@ class _AddToWatchesButton extends react.Component {
 var addToWatchesButton = react.registerComponent(() => new _AddToWatchesButton());
 
 class _SearchBar extends react.Component {
-  render() {
-    return react.div({"className": "row center-block"},
-        [searchTextInput({"onSubmit": _onSubmit}),
-         addToWatchesButton({})]);
+  CurrentUser get _user => this.props["user"];
+  Searchresult get _searchResult => this.props["searchResult"];
+  UserFeedWatches get _feedWatches => this.props["feedWatches"];
+
+  getInitialState(){
+    return {"showAddToWatches": false };
   }
 
-  bool get _isLoggedIn => this.props["isLoggedIn"];
-  Searchresult get _searchResult => this.props["searchResult"];
-  UserFeedWatches get _feedWatches => this.props["userState"];
+  render() {
+    if(this.state["showAddToWatches"]){
+      return react.div({"className": "row center-block"},
+              [searchTextInput({"onSubmit": _onSubmit,
+                                "onChange": _onChange}),
+               addToWatchesButton({})]);
+    } else {
+      return react.div({"className": "row center-block"},
+              [searchTextInput({"onSubmit": _onSubmit,
+                                "onChange": _onChange})]);
+    }
+  }
+
+  bool canBeAddedToWatches(String currentInput){
+    var result =
+      _user != null &&
+      currentInput != null && currentInput.trim() != "" &&
+      _feedWatches != null &&
+      !_feedWatches.Positions.any((x) => x.term == currentInput);
+
+    return result;
+  }
 
   _onSubmit(String text) {
      Actions.search(text);
+  }
+
+  _onChange(String text){
+    this.setState({"showAddToWatches": canBeAddedToWatches(text)});
   }
 }
 var searchBar = react.registerComponent(() => new _SearchBar());
