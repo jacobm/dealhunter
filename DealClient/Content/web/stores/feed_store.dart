@@ -78,6 +78,11 @@ class FeedStore {
       case AppConstants.AppSearch:
         _search(action["payload"]["searchTerm"]);
         break;
+      case AppConstants.AddToWatches:
+        var term = (action["payload"]["term"]);
+        FeedWatches._positions.add(new TermPosition.fromTerm(term));
+        AppEvents.PublishUserStateUpdatedEvent();
+        break;
     }
   }
 }
@@ -87,6 +92,10 @@ class TermPosition {
   String position;
 
   TermPosition(this.term, this.position);
+
+  factory TermPosition.fromTerm(String term){
+    return new TermPosition(term, null);
+  }
 }
 
 class UserFeedWatches {

@@ -2,30 +2,27 @@ library FeedWatches;
 
 import "package:react/react.dart" as react;
 import "../stores/feed_store.dart";
-import '../dispatcher/event_dispatcher.dart';
-import '../constants/app_constants.dart' as AppConstants;
 
 class _FeedWatches extends react.Component {
-  FeedStore feedStore;
-  EventDispatcher eventDispatcher = new EventDispatcher();
-  UserFeedWatches _feedWatches;
-  UserFeedWatches get UserState => _feedWatches;
 
-  componentWillMount() {
-     feedStore = new FeedStore();
-     eventDispatcher.attach(_onFeedEvent);
-  }
+  UserFeedWatches get _feedWatches => this.props["feedWatches"];
 
-  void _onFeedEvent(Map event){
-    switch(event["eventType"]){
-      case AppConstants.UserStateUpdated:
-        _feedWatches = feedStore.FeedWatches;
-        break;
+  renderWatches(){
+    if (this._feedWatches == null){
+      return react.div({});
     }
+
+    return this._feedWatches.Positions.map((x){
+      return react.li({}, x.term);
+    });
   }
 
   render() {
-    return react.div({"className": this.props["className"]}, "FeedWatch");
+    return react.div({"className": this.props["className"]},
+        react.div({}, [
+            "FeedWatch",
+            react.ul({}, renderWatches())
+            ]));
   }
 }
 

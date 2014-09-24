@@ -64,8 +64,9 @@ class _Application extends react.Component {
                                   "searchResult": this.state["searchResult"],
                                   "feedWatches": this.state["feedWatches"]}),
                        itemList({"className" : "col-sm-8",
-                               "searchResult": this.state["searchResult"]}),
-                       feedWatches({"className": "col-sm-4"})
+                                 "searchResult": this.state["searchResult"]}),
+                       feedWatches({"className": "col-sm-4",
+                                    "feedWatches": this.state["feedWatches"]})
                       ])]);
   }
 }

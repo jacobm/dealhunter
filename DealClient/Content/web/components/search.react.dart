@@ -63,7 +63,14 @@ class _AddToWatchesButton extends react.Component {
   render() {
     return
         react.div({"className": "col-sm-4 col-md-4"},
-            [react.button({"className": "btn btn-primary"}, "Watch")]);
+            [react.button(
+              {"className": "btn btn-primary",
+               "onClick":  (e) => _onClick(e)},
+               "Watch")]);
+  }
+
+  void _onClick(event){
+    this.props["onClick"]();
   }
 }
 var addToWatchesButton = react.registerComponent(() => new _AddToWatchesButton());
@@ -74,15 +81,17 @@ class _SearchBar extends react.Component {
   UserFeedWatches get _feedWatches => this.props["feedWatches"];
 
   getInitialState(){
-    return {"showAddToWatches": false };
+    return {"showAddToWatches": false,
+            "searchText": ""
+    };
   }
 
   render() {
-    if(this.state["showAddToWatches"]){
+    if(canBeAddedToWatches(this.state["searchText"])){
       return react.div({"className": "row center-block"},
               [searchTextInput({"onSubmit": _onSubmit,
                                 "onChange": _onChange}),
-               addToWatchesButton({})]);
+               addToWatchesButton({"onClick": _onAddToWatches})]);
     } else {
       return react.div({"className": "row center-block"},
               [searchTextInput({"onSubmit": _onSubmit,
@@ -105,7 +114,11 @@ class _SearchBar extends react.Component {
   }
 
   _onChange(String text){
-    this.setState({"showAddToWatches": canBeAddedToWatches(text)});
+    this.setState({"searchText": text});
+  }
+
+  _onAddToWatches(){
+    Actions.addToWatches(this.state["searchText"]);
   }
 }
 var searchBar = react.registerComponent(() => new _SearchBar());

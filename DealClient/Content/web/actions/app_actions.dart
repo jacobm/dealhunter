@@ -26,3 +26,10 @@ logout(){
     "payload": {}
   });
 }
+
+addToWatches(String term){
+  dispatcher.handleAction({
+    "actionType": AppConstants.AddToWatches,
+    "payload": {"term": term}
+  });
+}
