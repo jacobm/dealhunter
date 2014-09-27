@@ -1,6 +1,7 @@
 library FeedStore;
 
 import 'dart:html';
+import 'dart:async';
 import '../constants/app_constants.dart' as AppConstants;
 import '../dispatcher/app_dispatcher.dart';
 import '../dispatcher/event_dispatcher.dart';
@@ -51,26 +52,13 @@ class FeedStore {
   void _onEvent(Map event) {
     switch(event["eventType"]) {
       case AppConstants.GoogleCodeReceivedEvent:
-        _onGoogleCodeReceived(event["payload"]["code"]);
+        var code = event["payload"]["code"];
+        Storage.login(code).then((watches){
+          _userState = watches;
+          AppEvents.PublishUserStateUpdatedEvent();
+        });
         break;
     }
-  }
-
-  void _onGoogleCodeReceived(String code){
-    HttpRequest.request(
-        "api/login",
-        method: 'POST',
-        requestHeaders:{'Content-Type': 'application/json;charset=utf-8'},
-        sendData: JSON.encode({"code": code}))
-    .then((HttpRequest response){
-      if (response.status != 200){
-         throw new Exception("Server login failed");
-      }
-
-      _userState = new UserFeedWatches.fromString(response.responseText);
-      AppEvents.PublishUserStateUpdatedEvent();
-    });
-
   }
 
   void _onAction(action){
