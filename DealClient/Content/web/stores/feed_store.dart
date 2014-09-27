@@ -87,6 +87,39 @@ class FeedStore {
   }
 }
 
+class Storage
+{
+  static Future<UserFeedWatches> login(String code){
+    return HttpRequest.request(
+        "api/login",
+        method: 'POST',
+        requestHeaders:{'Content-Type': 'application/json;charset=utf-8'},
+        sendData: JSON.encode({"code": code}))
+    .then((HttpRequest response){
+      if (response.status == 200){
+        return new UserFeedWatches.fromString(response.responseText);
+      }
+      throw new Exception("Server login failed");
+    });
+  }
+
+  static Future<bool> save(UserFeedWatches watches){
+    var data = JSON.encode(watches);
+    return HttpRequest.request(
+        "api/userdata",
+        method: 'POST',
+        requestHeaders:{'Content-Type': 'application/json;charset=utf-8'},
+        sendData: data)
+    .then((HttpRequest response){
+      if (response.status == 200){
+        return true;
+      }
+      return false;
+    });
+  }
+}
+
+
 class TermPosition {
   String term;
   String position;
