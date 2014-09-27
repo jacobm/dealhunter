@@ -96,6 +96,10 @@ class TermPosition {
   factory TermPosition.fromTerm(String term){
     return new TermPosition(term, null);
   }
+
+  Map toJSon(){
+    return {"term": term, "position": position};
+  }
 }
 
 class UserFeedWatches {
@@ -112,6 +116,11 @@ class UserFeedWatches {
     }).toList();
 
     return new UserFeedWatches(positions);
+  }
+
+  Map toJson(){
+    var positions = Positions.map((x) => x.toJSon()).toList();
+    return {"positions": positions};
   }
 }
 
