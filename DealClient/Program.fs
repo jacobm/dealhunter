@@ -115,7 +115,7 @@ module Persistence =
              WHERE NOT EXISTS (SELECT * FROM upsert)
             ", connection)
         command.Parameters.AddWithValue("@id", id) |> ignore
-        command.Parameters.AddWithValue("@json", data) |> ignore
+        command.Parameters.AddWithValue("@data", data) |> ignore
         let result = command.ExecuteNonQuery()
         ()
 
