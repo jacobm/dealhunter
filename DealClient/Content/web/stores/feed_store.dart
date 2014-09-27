@@ -81,7 +81,9 @@ class FeedStore {
       case AppConstants.AddToWatches:
         var term = (action["payload"]["term"]);
         FeedWatches._positions.add(new TermPosition.fromTerm(term));
-        AppEvents.PublishUserStateUpdatedEvent();
+        Storage.save(FeedWatches).then((value){
+          AppEvents.PublishUserStateUpdatedEvent();
+        });
         break;
     }
   }
