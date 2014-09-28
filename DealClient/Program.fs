@@ -1,8 +1,23 @@
-﻿
-module DealClientTypes =
-    type TermPosition = { term : string; position : string }
+﻿namespace DealClient
+
+module DealClientDomain =
+    type Term = string
+    type TermPosition = { term : Term; position : string }
     type UserData = { positions : TermPosition list }
     type GoogleId = Id of string
+    type UserEvent =
+    | Watch of Term
+    | SetTermPosition of TermPosition
+    | Unwatch of Term
+
+    let getPosition events =
+        let accfunc acc event =
+            match (acc, event) with
+            | (_, Watch _) -> (true, None)
+            | (_, Unwatch _) -> (false, None)
+            | ((true, _), SetTermPosition pos) -> (true, Some pos.position)
+            | ((false, _), SetTermPosition position) -> (false, None)
+        Seq.fold accfunc (false, None) events
 
 module SigninValidation =
     open System
@@ -10,7 +25,7 @@ module SigninValidation =
     open System.Text
     open System.IO
     open Newtonsoft.Json
-    open DealClientTypes
+    open DealClientDomain
     open ScraperCommon.Settings
 
     type CodePostItem = {code: string}
@@ -74,7 +89,7 @@ module DealClientSettings =
 module Persistence =
     open Npgsql
     open Newtonsoft.Json
-    open DealClientTypes
+    open DealClientDomain
 
     let getConnection (connectionString : string) =
         let connection =
@@ -132,7 +147,7 @@ module Site  =
     open Newtonsoft.Json
     open SigninValidation
     open ScraperCommon.Settings
-    open DealClientTypes
+    open DealClientDomain
 
     // fixme: move to common place
     let (?) (parameters : obj) param = (parameters :?> Nancy.DynamicDictionary).[param]
