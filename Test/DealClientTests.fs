@@ -18,26 +18,26 @@ module DealClientDomainTests =
 
     [<Fact>]
     let ``empty seq is not watched`` () =
-        Assert.True(getPosition Seq.empty = (false, None))
+        Assert.True(getPosition Seq.empty = None)
 
     [<Fact>]
     let ``seq with only Watch is watched`` () =
         let events = [Watch "dingo"]
-        Assert.True(getPosition events = (true, None))
+        Assert.True(Option.isSome (getPosition events))
 
     [<Fact>]
     let ``Unwatch results in term not being watched`` () =
         let events = [Watch "dingo"; Unwatch "dingo"]
-        Assert.True(getPosition events = (false, None))
+        Assert.True(Option.isSome (getPosition events))
 
     [<Fact>]
     let ``SetTermPosition sets position`` () =
-        let events = [Watch "dingo"; SetTermPosition {term = "dingo"; position = "1"}]
-        Assert.True(getPosition events = (true, Some "1"))
+        let events = [Watch "dingo"; SetTermPosition ("dingo", "1")]
+        let (Some state) = getPosition events
+        Assert.True(state.isWatched)
+        Assert.True(state.term = "dingo")
+        Assert.True(state.position = Some "1")
 
-    [<Property>]
-    let ``square should be positive`` (x:float) =
-        x * x > 0.
 
     [<Property>]
     let ``Testings`` (x:UserEvent list) =
