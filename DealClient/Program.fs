@@ -7,17 +7,32 @@ module DealClientDomain =
     type GoogleId = Id of string
     type UserEvent =
     | Watch of Term
-    | SetTermPosition of TermPosition
+    | SetTermPosition of Term * string
     | Unwatch of Term
+    type Position = {term: Term; isWatched: bool; position: string option}
 
     let getPosition events =
         let accfunc acc event =
             match (acc, event) with
-            | (_, Watch _) -> (true, None)
-            | (_, Unwatch _) -> (false, None)
-            | ((true, _), SetTermPosition pos) -> (true, Some pos.position)
-            | ((false, _), SetTermPosition position) -> (false, None)
-        Seq.fold accfunc (false, None) events
+            | (_, Watch t) -> Some {term = t; isWatched = true; position = None }
+            | (_, Unwatch t) -> Some {term = t; isWatched = false; position = None }
+            | (Some _, SetTermPosition (t, pos)) -> Some {term = t; isWatched = true; position = Some pos}
+            | (None, SetTermPosition (t, _)) -> Some {term = t; isWatched = false; position = None}
+        Seq.fold accfunc None events
+
+    let getTerm event =
+        match event with
+        | Watch t -> t
+        | SetTermPosition (t, _) -> t
+        | Unwatch t -> t
+
+    let buildState events =
+        let state = Seq.groupBy getTerm events
+                    |> Seq.map (fun x -> snd x)
+                    |> Seq.map getPosition
+                    |> Seq.filter (fun x -> Option.isSome x)
+                    |> Seq.map (fun x -> x.Value)
+        state
 
 module SigninValidation =
     open System
