@@ -10,10 +10,30 @@ module FsGenerators =
     // http://fscheck.codeplex.com/wikipage?title=Test%20Data%20Generators
     let eventGen() : Gen<UserEvent> =
         Gen.oneof [ gen { return Watch "fisk"}; gen { return Unwatch "fisk"}]
-    type Generators =
+
+    let generateSetPosition term : Gen<UserEvent> =
+        gen {
+            let! pos = Arb.generate<string>
+            return SetTermPosition (term, pos)
+        }
+
+    let openListGenerator()  : Gen<UserEvent list> =
+        gen {
+            let start = Watch "dingo"
+            let! pos = Gen.listOf (generateSetPosition "dingo")
+            let startHest = Watch "hest"
+
+            let! concat = [(generateSetPosition "dingo"); (generateSetPosition "hest")] |> Gen.sequence
+
+            return [start] @ pos @ [startHest] @ concat
+        }
+
+    type MyGenerators =
         static member UserEvent() = eventGen() |> Arb.fromGen 
+        static member OpenListGenerator() = openListGenerator() |> Arb.fromGen
 
 module DealClientDomainTests =
+    open FsGenerators
     open DealClient.DealClientDomain
 
     [<Fact>]
@@ -33,7 +53,7 @@ module DealClientDomainTests =
     [<Fact>]
     let ``SetTermPosition sets position`` () =
         let events = [Watch "dingo"; SetTermPosition ("dingo", "1")]
-        let (Some state) = getPosition events
+        let state = (getPosition events).Value
         Assert.True(state.isWatched)
         Assert.True(state.term = "dingo")
         Assert.True(state.position = Some "1")
@@ -50,6 +70,25 @@ module DealClientDomainTests =
         Assert.True(hest.isWatched)
         Assert.True(hest.position = None)
 
-    [<Property>]
-    let ``Testings`` (x:UserEvent list) =
-        true
+    [<Property(Arbitrary=[|typeof<MyGenerators>|])>]
+    let ``Two open sequences`` (events : UserEvent list) =
+        let isPosition term event =
+            match event with
+            | SetTermPosition (t, _) when t = term -> true
+            | _ -> false
+
+        let getPosition event =
+            match event with
+            | SetTermPosition (_, pos) -> pos
+            | _ -> null
+
+        let result = buildState events
+
+        let test (state : Position) =
+            Assert.True(state.isWatched)
+            let pos = events |> List.rev |> List.find (isPosition state.term) |> getPosition
+            let result = pos = state.position.Value
+            Assert.True(result)
+
+        Assert.True(Seq.length result = 2)
+        result |> Seq.iter test
