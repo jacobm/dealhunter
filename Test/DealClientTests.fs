@@ -70,6 +70,18 @@ module DealClientDomainTests =
         Assert.True(hest.isWatched)
         Assert.True(hest.position = None)
 
+    [<Fact>]
+    let ``getTermPosition returns watched term's postition`` () =
+        let state = {term = "dingo"; isWatched = true; position = (Some "pos") }
+        let result = getTermState "dingo" [state]
+        Assert.True(result.Value.position = (Some "pos"))
+
+    [<Fact>]
+    let ``getTermPosition returns None for not watched term`` () =
+        let state = {term = "dingo"; isWatched = true; position = (Some "pos") }
+        let result = getTermState "fisk" [state]
+        Assert.True(result.IsNone)
+
     [<Property(Arbitrary=[|typeof<MyGenerators>|])>]
     let ``Two open sequences`` (events : UserEvent list) =
         let isPosition term event =
