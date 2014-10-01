@@ -71,6 +71,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="GoogleSigninValidation.fs" />
     <Compile Include="DealClientDomain.fs" />
     <Compile Include="Program.fs" />
     <None Include="App.config" />
