@@ -60,7 +60,7 @@ module Site  =
             self.Post.["/api/login"] <- fun _ ->
                 use reader = new StreamReader(self.Request.Body)
                 let codeRequest = JsonConvert.DeserializeObject<CodePostItem>(reader.ReadToEnd())
-                let googleId = getUserId codeRequest.code
+                let googleId = Id (getUserId codeRequest.code)
                 setUserIdInSession self.Session (Some googleId)
                 handleUserData googleId |> okResponse :> obj
 
