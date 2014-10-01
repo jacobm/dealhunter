@@ -73,6 +73,7 @@
   <ItemGroup>
     <Compile Include="GoogleSigninValidation.fs" />
     <Compile Include="DealClientDomain.fs" />
+    <Compile Include="Persistence.fs" />
     <Compile Include="Program.fs" />
     <None Include="App.config" />
     <None Include="packages.config" />
