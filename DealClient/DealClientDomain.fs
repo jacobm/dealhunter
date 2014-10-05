@@ -38,3 +38,33 @@ module DealClientDomain =
         let term = Seq.filter (fun x -> x.term = term) state
         if (Seq.isEmpty term) then None else Some (Seq.head term)
 
+    type DomainOp =
+    | Success
+    | Failure of string
+
+    let termState reader googleId term =
+        (reader >> buildState >> (getTermState term)) googleId
+
+    let startWatching reader writer googleId term =
+        let termState = termState reader googleId term
+        if termState.IsNone
+            then writer googleId term (Watch term)
+                 Success
+            else
+                 Failure "Already watching"
+
+    let setTermPosition reader writer googleId term pos =
+        let termState = termState reader googleId term
+        match termState with
+        | None -> Failure "Not watching term and cannot set position"
+        | Some _ -> let event = SetTermPosition (term, pos)
+                    writer googleId term event
+                    Success
+
+    let stopWatching reader writer googleId term =
+        let termState = termState reader googleId term
+        if termState.IsNone
+            then writer googleId term (Unwatch term)
+                 Failure "Not watching"
+            else
+                Success
