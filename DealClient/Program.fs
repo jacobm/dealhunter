@@ -44,41 +44,69 @@ module Site  =
         resp.Contents <- fun s -> s.Write(data, 0, data.Length)
         resp
 
+    // server understood the request, but declined to fulfill it.
+    let respond403 (reason : string) =
+        let data = Encoding.UTF8.GetBytes(reason)
+        let resp = new Response()
+        resp.StatusCode <- HttpStatusCode.OK
+        resp.ContentType <- "application/json;charset=utf-8"
+        resp.Contents <- fun s -> s.Write(data, 0, data.Length)
+        resp
+
+
+    type PostWatch = {term: Term}
+    type PostSetPosition = {position: string}
+    type State = {term : Term; position: string}
+
     type DealClient() as self = 
         inherit NancyModule()
 
         do 
             let postgre = DealClientSettings.postgreConnectionString (get "environment")
-
-            let handleUserData googleId =
-                let userdata = Persistence.getUserData postgre googleId
-                let result = match userdata with
-                             | None -> { positions = [] }
-                             | Some x ->  x
-                JsonConvert.SerializeObject(result)
+            let watchTerm = startWatching (Persistence.getEvents postgre) (Persistence.saveEvent postgre)
+            let setTermPos = setTermPosition (Persistence.getEvents postgre) (Persistence.saveEvent postgre)
 
             self.Post.["/api/login"] <- fun _ ->
                 use reader = new StreamReader(self.Request.Body)
                 let codeRequest = JsonConvert.DeserializeObject<CodePostItem>(reader.ReadToEnd())
                 let googleId = Id (getUserId codeRequest.code)
                 setUserIdInSession self.Session (Some googleId)
-                handleUserData googleId |> okResponse :> obj
+                let events = Persistence.getEvents postgre googleId
+                buildState events |> okResponse :> obj
 
-            self.Get.["/api/userdata"] <- fun _ ->
+            self.Get.["/api/watches"] <- fun _ ->
                 let googleId = getUserIdFromSession self.Session
                 match googleId with
                 | None -> HttpStatusCode.Unauthorized :> obj
-                | Some id -> (handleUserData id) :> obj
- 
-            self.Post.["/api/userdata"] <- fun _ ->
+                | Some id -> let events = Persistence.getEvents postgre id
+                             let state = buildState events
+                             okResponse state :> obj
+
+            self.Post.["/api/watches"] <- fun _ ->
                 let googleId = getUserIdFromSession self.Session
                 match googleId with
                 | None -> HttpStatusCode.Unauthorized :> obj
                 | Some id ->
                     use reader = new StreamReader(self.Request.Body)
-                    let userdata = JsonConvert.DeserializeObject<UserData>(reader.ReadToEnd())
-                    Persistence.setUserData postgre id userdata
-                    "ok" :> obj
+                    let watch = JsonConvert.DeserializeObject<PostWatch>(reader.ReadToEnd())
+                    let result = watchTerm id watch.term
+                    match result with
+                    | Success -> okResponse "success" :> obj
+                    | Failure reason -> respond403 reason :> obj
+
+            self.Post.["/api/watches/{term}"] <- fun parameters ->
+                let term = (parameters?term).ToString()
+                let googleId = getUserIdFromSession self.Session
+                match googleId with
+                | None -> HttpStatusCode.Unauthorized :> obj
+                | Some id ->
+                    use reader = new StreamReader(self.Request.Body)
+                    let newPosition = JsonConvert.DeserializeObject<PostSetPosition>(reader.ReadToEnd())
+                    let result = setTermPos id term newPosition.position
+                    match result with
+                    | Success -> okResponse "success" :> obj
+                    | Failure reason -> respond403 reason :> obj
+
 
         type DartClientBootstrapper() =
             inherit DefaultNancyBootstrapper()

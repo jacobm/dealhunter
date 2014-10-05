@@ -69,7 +69,8 @@ class FeedStore {
       case AppConstants.AddToWatches:
         var term = (action["payload"]["term"]);
         FeedWatches._positions.add(new TermPosition.fromTerm(term));
-        Storage.save(FeedWatches).then((value){
+        var event = Events.Watch(term);
+        Storage.saveEvent(event, "api/watches").then((value){
           AppEvents.PublishUserStateUpdatedEvent();
         });
         break;
@@ -93,6 +94,21 @@ class Storage
     });
   }
 
+  static Future<bool> saveEvent(Map state, String resource){
+      var data = JSON.encode(state);
+      return HttpRequest.request(
+          resource,
+          method: 'POST',
+          requestHeaders:{'Content-Type': 'application/json;charset=utf-8'},
+          sendData: data)
+      .then((HttpRequest response){
+        if (response.status == 200){
+          return true;
+        }
+        return false;
+      });
+    }
+
   static Future<bool> save(UserFeedWatches watches){
     var data = JSON.encode(watches);
     return HttpRequest.request(
@@ -109,6 +125,19 @@ class Storage
   }
 }
 
+class Events{
+  static Map Watch(String term){
+    return {"term": term};
+  }
+
+  static Map Unwatch(String term){
+    return {"term": term};
+  }
+
+  static Map SetPosition(String term, String position){
+    return {"term": term, "position": position};
+  }
+}
 
 class TermPosition {
   String term;
@@ -133,8 +162,8 @@ class UserFeedWatches {
   UserFeedWatches(this._positions);
 
   factory UserFeedWatches.fromString(String value){
-    var json = JSON.decode(JSON.decode(value)); // fix escapes
-    var positions = json["positions"].map((x){
+    var json = JSON.decode(value);
+    var positions = json.map((x){
       return new TermPosition(x["term"], x["position"]);
     }).toList();
 

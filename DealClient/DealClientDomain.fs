@@ -2,8 +2,6 @@
 
 module DealClientDomain =
     type Term = string
-    type TermPosition = { term : Term; position : string }
-    type UserData = { positions : TermPosition list }
     type GoogleId = Id of string
     type UserEvent =
     | Watch of Term

@@ -13,14 +13,11 @@ module Persistence =
 
     let dropTables connectionString =
         use connection = getConnection connectionString
-        let command = new NpgsqlCommand(@"drop table userdata;", connection)
+        let command = new NpgsqlCommand(@"drop table term_events;", connection)
         command.ExecuteNonQuery
 
     let createTables connectionString =
         use connection = getConnection connectionString
-        let command = new NpgsqlCommand(@"
-            create table userdata (id serial primary key, googleId numeric(25) not null, data json not null);", connection)
-        command.ExecuteNonQuery() |> ignore
         let termCommand = new NpgsqlCommand(@"
             create table term_events (
                 id serial primary key,
@@ -36,7 +33,7 @@ module Persistence =
         use connection = getConnection connectionString
         let command = new NpgsqlCommand(@"
             insert into term_events (googleId, term, createdAt, event)
-            values (@id, @term, current_timestamp(), @event)", connection)
+            values (@id, @term, current_timestamp, @event)", connection)
         command.Parameters.AddWithValue("@id", id) |> ignore
         command.Parameters.AddWithValue("@term", term) |> ignore
         command.Parameters.AddWithValue("@event", data) |> ignore
@@ -45,36 +42,10 @@ module Persistence =
     let getEvents connectionString (googleId : GoogleId) =
         let (Id id) = googleId
         use connection = getConnection connectionString
-        let command = new NpgsqlCommand(@"select data from userdata where googleId = @id", connection)
+        let command = new NpgsqlCommand(@"select event from term_events where googleId = @id", connection)
         command.Parameters.AddWithValue("@id", id) |> ignore
         seq {
             use reader = command.ExecuteReader()
             while reader.Read() do
                 yield JsonConvert.DeserializeObject<UserEvent>(reader.GetString(0))
-        }
-          
-    let getUserData connectionString (googleId : GoogleId) =
-        let (Id id) = googleId
-        use connection = getConnection connectionString
-        let command = new NpgsqlCommand(@"select data from userdata where googleId = @id", connection)
-        command.Parameters.AddWithValue("@id", id) |> ignore
-        use reader = command.ExecuteReader()
-        match reader.Read() with
-        | true -> Some(JsonConvert.DeserializeObject<UserData>(reader.GetString(0)))
-        | _ -> None
-
-    let setUserData connectionString (googleId : GoogleId) userData =
-        let (Id id) = googleId
-        let data = JsonConvert.SerializeObject(userData)
-        use connection = getConnection connectionString
-        let command = new NpgsqlCommand(@"
-             WITH upsert AS (
-                 UPDATE userdata SET data = @data
-                 WHERE googleId = @id RETURNING *)
-             INSERT INTO userdata (googleId, data) SELECT @id, @data
-             WHERE NOT EXISTS (SELECT * FROM upsert)
-            ", connection)
-        command.Parameters.AddWithValue("@id", id) |> ignore
-        command.Parameters.AddWithValue("@data", data) |> ignore
-        let result = command.ExecuteNonQuery()
-        ()
+        } |> Seq.toList
